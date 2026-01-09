@@ -120,6 +120,12 @@
             if (selectedFullAddress) updateVisuals(selectedFullAddress);
         });
 
+        document.getElementById('address-search').addEventListener('keypress', (e) => {
+			if (e.key === 'Enter') {
+				if (selectedFullAddress) updateVisuals(selectedFullAddress);
+			}
+        });
+
         async function updateVisuals(addressString) {
             const loader = document.getElementById('loader');
             const errorDiv = document.getElementById('error-msg');
@@ -190,4 +196,5 @@
     </script>
 </body>
 </html>
+
 
