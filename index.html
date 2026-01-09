@@ -56,7 +56,7 @@
                 <label>Canadian Address Search</label>
                 <input type="text" id="address-search" placeholder="Start typing address...">
                 <div class="button-group">
-                    <button id="btn-submit" class="btn btn-primary">Show View</button>
+                    <button id="btn-submit" class="btn btn-primary">Update Viewers</button>
                     <a id="btn-external" href="#" target="_blank" class="btn btn-outline" style="display: none;">Open in Google Maps ↗</a>
                 </div>
                 <div id="error-msg" class="error-msg"></div>
@@ -77,7 +77,7 @@
         </div>
     </div>
 
-    <script src="https://ws1.postescanada-canadapost.ca/js/addresscomplete-2.50.min.js?key=nw26-hk95-gk49-kd66"></script>
+    <script src="https://ws1.postescanada-canadapost.ca/js/addresscomplete-2.50.min.js?key=12nw26-hk95-gk49-kd66"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBlU9x3Z7krumC5n-6xoVgBhcaGCBzRcR8&libraries=geometry,marker&callback=initApp" async defer></script>
 
     <script>
@@ -119,82 +119,77 @@
         document.getElementById('btn-submit').addEventListener('click', () => {
             if (selectedFullAddress) updateVisuals(selectedFullAddress);
         });
-
-        document.getElementById('address-search').addEventListener('keypress', (e) => {
+		
+		document.getElementById('address-search').addEventListener('keypress', (e) => {
 			if (e.key === 'Enter') {
 				if (selectedFullAddress) updateVisuals(selectedFullAddress);
 			}
         });
 
-        async function updateVisuals(addressString) {
-            const loader = document.getElementById('loader');
-            const errorDiv = document.getElementById('error-msg');
-            const externalBtn = document.getElementById('btn-external');
+    async function updateVisuals(addressString) {
+        const loader = document.getElementById('loader');
+        const errorDiv = document.getElementById('error-msg');
+        
+        loader.style.display = 'flex';
+        errorDiv.style.display = 'none';
 
-            loader.style.display = 'flex';
-            errorDiv.style.display = 'none';
+        try {
+            // 1. Geocode the address
+            const geoResponse = await new Promise((res, rej) => {
+                geocoder.geocode({ address: addressString }, (r, s) => s === "OK" ? res(r[0]) : rej(s));
+            });
+            const rooftopLoc = geoResponse.geometry.location;
 
-            try {
-                // 1. CLEAN ADDRESS
-                const searchString = addressString.replace(/(Suite|Unit|Apt|#|U)\s*\d+[,-\s]*/i, '').trim();
+            // 2. Update the Overhead Map
+            map.setCenter(rooftopLoc);
+            map.setZoom(19); // Tight zoom on the house
+            new AdvancedMarkerElement({ map, position: rooftopLoc });
 
-                // 2. GEOCODE ROOFTOP
-                const geoResponse = await new Promise((res, rej) => {
-                    geocoder.geocode({ address: searchString }, (r, s) => s === "OK" ? res(r[0]) : rej(s));
+            // 3. Find the Street View
+            const svService = new google.maps.StreetViewService();
+            const svData = await new Promise((resolve, reject) => {
+                svService.getPanorama({
+                    location: rooftopLoc,
+                    radius: 50, // Smaller radius is better for houses to avoid snapping to back alleys
+                    source: google.maps.StreetViewSource.GOOGLE,
+                    preference: google.maps.StreetViewPreference.NEAREST
+                }, (data, status) => {
+                    if (status === "OK") resolve(data);
+                    else reject(status);
                 });
-                const rooftopLoc = geoResponse.geometry.location;
+            });
 
-                // 3. UPDATE MAP
-                map.setCenter(rooftopLoc);
-                map.setZoom(19);
-                new AdvancedMarkerElement({ map, position: rooftopLoc });
+            // 4. Calculate Heading (The Angle)
+            const heading = google.maps.geometry.spherical.computeHeading(
+                svData.location.latLng, 
+                rooftopLoc
+            );
 
-                // 4. EXTERNAL LINK
-                externalBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressString)}`;
-                externalBtn.style.display = 'inline-flex';
+            // 5. Apply the "Residential Focus"
+            panorama.setPano(svData.location.pano);
+            panorama.setPov({ 
+                heading: heading, 
+                pitch: 5,   // Slightly up to see the roofline
+                zoom: 1     // Zoom level 1 is often better for houses than the wide-angle default
+            });
+            
+            // Optional: Ensure the Street View options don't allow "drifting" away
+            panorama.setOptions({
+                addressControl: true,
+                linksControl: false, // Disables the arrows to walk down the street
+                panControl: true
+            });
 
-                // 5. THE "SNAPPING" FIX
-                // First, find the nearest official Google Street View Panorama
-                const svService = new google.maps.StreetViewService();
-                
-                const svData = await new Promise((resolve, reject) => {
-                    svService.getPanorama({
-                        location: rooftopLoc,
-                        radius: 100,
-                        source: google.maps.StreetViewSource.GOOGLE, // Official imagery only
-                        preference: google.maps.StreetViewPreference.BEST // Prefer road-side
-                    }, (data, status) => {
-                        if (status === "OK") resolve(data);
-                        else reject(status);
-                    });
-                });
+            panorama.setVisible(true);
 
-                // 6. CALCULATE POV
-                // Heading: Calculate angle from the car position to the building center
-                const heading = google.maps.geometry.spherical.computeHeading(
-                    svData.location.latLng, 
-                    rooftopLoc
-                );
-
-                // Pitch: Look slightly up for skyscrapers if we are very close
-                const distance = google.maps.geometry.spherical.computeDistanceBetween(svData.location.latLng, rooftopLoc);
-                const pitch = distance < 25 ? 10 : 0; 
-
-                panorama.setPano(svData.location.pano);
-                panorama.setPov({ heading: heading, pitch: pitch });
-                panorama.setVisible(true);
-
-            } catch (err) {
-                console.warn("SV Logic Error:", err);
-                errorDiv.innerText = "Official street imagery not found. Showing overhead map only.";
-                errorDiv.style.display = "block";
-                if (panorama) panorama.setVisible(false);
-            } finally {
-                loader.style.display = 'none';
-            }
+        } catch (err) {
+            errorDiv.innerText = "Could not find a clear street view for this house.";
+            errorDiv.style.display = "block";
+            if (panorama) panorama.setVisible(false);
+        } finally {
+            loader.style.display = 'none';
         }
+    }
     </script>
 </body>
 </html>
-
-
