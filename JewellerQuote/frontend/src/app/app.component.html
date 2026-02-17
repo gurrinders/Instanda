@@ -1,0 +1,17 @@
+<div class="navbar">
+  <div class="navbar-content">
+    <div class="navbar-brand">Jeweller Quote Application</div>
+    <div class="navbar-links" *ngIf="authService.isAuthenticated()">
+      <a routerLink="/dashboard">Dashboard</a>
+      <a routerLink="/quote/new">New Quote</a>
+      <a routerLink="/quotes">My Quotes</a>
+      <a (click)="logout()" style="cursor: pointer;">Logout</a>
+    </div>
+    <div class="navbar-links" *ngIf="!authService.isAuthenticated()">
+      <a routerLink="/login">Login</a>
+      <a routerLink="/register">Register</a>
+    </div>
+  </div>
+</div>
+
+<router-outlet></router-outlet>

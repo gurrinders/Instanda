@@ -1,0 +1,52 @@
+<div class="container">
+  <div *ngIf="loading" class="loading">Loading quote...</div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="quote && !loading" class="card">
+    <h1>Quote #{{ quote.id }}</h1>
+    <p><strong>Created:</strong> {{ quote.created_at | date:'full' }}</p>
+
+    <div *ngIf="application">
+      <h2>Application Details</h2>
+      <p><strong>Firm Name:</strong> {{ application.firm_name || 'N/A' }}</p>
+      <p><strong>Premises Address:</strong> {{ application.premises_address || 'N/A' }}</p>
+      <p><strong>Annual Gross Revenue:</strong> {{ application.annual_gross_revenue | number:'1.2-2' || 'N/A' }}</p>
+    </div>
+
+    <div style="margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+      <h2>Premium Summary</h2>
+      <table style="width: 100%; margin-top: 15px;">
+        <tr>
+          <td style="padding: 10px;"><strong>Base Premium:</strong></td>
+          <td style="text-align: right; padding: 10px;">{{ quote.currency }} {{ quote.base_premium | number:'1.2-2' }}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px;"><strong>Fees:</strong></td>
+          <td style="text-align: right; padding: 10px;">{{ quote.currency }} {{ quote.fees | number:'1.2-2' }}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px;"><strong>Taxes:</strong></td>
+          <td style="text-align: right; padding: 10px;">{{ quote.currency }} {{ quote.taxes | number:'1.2-2' }}</td>
+        </tr>
+        <tr style="border-top: 2px solid #333; font-size: 18px;">
+          <td style="padding: 10px;"><strong>Total Premium:</strong></td>
+          <td style="text-align: right; padding: 10px; font-weight: bold;">{{ quote.currency }} {{ quote.total_premium | number:'1.2-2' }}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="margin-top: 30px;">
+      <h3>Breakdown</h3>
+      <pre *ngIf="getBreakdown()" style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto;">{{ getBreakdown() | json }}</pre>
+      <p *ngIf="!getBreakdown()">No detailed breakdown available.</p>
+    </div>
+
+    <div style="margin-top: 30px; display: flex; gap: 15px;">
+      <button class="btn btn-primary" (click)="createNewQuote()">Create New Quote</button>
+      <button class="btn btn-secondary" (click)="viewAllQuotes()">View All Quotes</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<div class="container">
+  <h1>Dashboard</h1>
+  
+  <div *ngIf="loading" class="loading">Loading...</div>
+
+  <div *ngIf="!loading">
+    <div style="margin-bottom: 30px;">
+      <button class="btn btn-primary" (click)="createNewQuote()">
+        Create New Quote
+      </button>
+    </div>
+
+    <div class="form-row">
+      <div class="card" style="flex: 1;">
+        <h3>Recent Applications</h3>
+        <div *ngIf="recentApplications.length === 0">
+          <p>No applications yet. <a (click)="createNewQuote()" style="cursor: pointer;">Create your first quote</a></p>
+        </div>
+        <ul *ngIf="recentApplications.length > 0" style="list-style: none; padding: 0;">
+          <li *ngFor="let app of recentApplications" style="padding: 10px; border-bottom: 1px solid #eee;">
+            <strong>{{ app.firm_name || 'Unnamed Application' }}</strong><br>
+            <small>{{ app.created_at | date:'short' }}</small>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card" style="flex: 1;">
+        <h3>Recent Quotes</h3>
+        <div *ngIf="recentQuotes.length === 0">
+          <p>No quotes yet.</p>
+        </div>
+        <ul *ngIf="recentQuotes.length > 0" style="list-style: none; padding: 0;">
+          <li *ngFor="let quote of recentQuotes" style="padding: 10px; border-bottom: 1px solid #eee; cursor: pointer;" (click)="viewQuote(quote.id)">
+            <strong>Quote #{{ quote.id }}</strong><br>
+            <small>Total Premium: {{ quote.currency }} {{ quote.total_premium | number:'1.2-2' }}</small><br>
+            <small>{{ quote.created_at | date:'short' }}</small>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

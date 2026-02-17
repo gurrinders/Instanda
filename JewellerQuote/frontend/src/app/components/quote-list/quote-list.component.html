@@ -1,0 +1,35 @@
+<div class="container">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <h1>My Quotes</h1>
+    <button class="btn btn-primary" (click)="createNewQuote()">Create New Quote</button>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading quotes...</div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!loading && quotes.length === 0" class="card">
+    <p>No quotes found. <a (click)="createNewQuote()" style="cursor: pointer; color: #007bff;">Create your first quote</a></p>
+  </div>
+
+  <div *ngIf="!loading && quotes.length > 0">
+    <div class="card" *ngFor="let quote of quotes" style="cursor: pointer; margin-bottom: 15px;" (click)="viewQuote(quote.id)">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h3 style="margin: 0;">Quote #{{ quote.id }}</h3>
+          <p style="margin: 5px 0; color: #666;">Created: {{ quote.created_at | date:'medium' }}</p>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 24px; font-weight: bold; color: #007bff;">
+            {{ quote.currency }} {{ quote.total_premium | number:'1.2-2' }}
+          </div>
+          <div style="font-size: 14px; color: #666;">
+            Base: {{ quote.currency }} {{ quote.base_premium | number:'1.2-2' }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

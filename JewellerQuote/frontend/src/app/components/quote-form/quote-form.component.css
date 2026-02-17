@@ -1,0 +1,16 @@
+/* Component-specific styles */
+.step-indicator {
+  margin-bottom: 40px;
+}
+
+.card h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.card h3 {
+  margin-top: 30px;
+  margin-bottom: 15px;
+  color: #555;
+  font-size: 18px;
+}

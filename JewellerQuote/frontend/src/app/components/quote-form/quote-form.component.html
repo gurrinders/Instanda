@@ -1,0 +1,614 @@
+<div class="container">
+  <h1>Jewellers Block Insurance Application</h1>
+
+  <!-- Step Indicator -->
+  <div class="step-indicator">
+    <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
+      <div class="step-number">1</div>
+      <div class="step-title">Firm Details</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">
+      <div class="step-number">2</div>
+      <div class="step-title">Business & Employees</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">
+      <div class="step-number">3</div>
+      <div class="step-title">Losses & History</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 4" [class.completed]="currentStep > 4">
+      <div class="step-number">4</div>
+      <div class="step-title">Inventories</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 5" [class.completed]="currentStep > 5">
+      <div class="step-number">5</div>
+      <div class="step-title">Coverage & Limits</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 6" [class.completed]="currentStep > 6">
+      <div class="step-number">6</div>
+      <div class="step-title">Building & Security</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 7" [class.completed]="currentStep > 7">
+      <div class="step-number">7</div>
+      <div class="step-title">Travellers & Windows</div>
+    </div>
+    <div class="step" [class.active]="currentStep === 8" [class.completed]="currentStep > 8">
+      <div class="step-number">8</div>
+      <div class="step-title">Review & Submit</div>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Step 1: Firm Details -->
+  <div class="card" *ngIf="currentStep === 1">
+    <h2>1. Firm Definition</h2>
+    <div class="form-group">
+      <label>Firm or Corporation Name *</label>
+      <input type="text" [(ngModel)]="payload.firm_name" required />
+    </div>
+    <div class="form-group">
+      <label>Names of Individuals with Proprietary/Financial Interest</label>
+      <textarea [(ngModel)]="payload.individuals_with_interest" rows="3"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Officers & Directors</label>
+      <textarea [(ngModel)]="payload.officers_directors" rows="3"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Premises Address *</label>
+      <textarea [(ngModel)]="payload.premises_address" rows="2" required></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Years in These Premises</label>
+        <input type="number" [(ngModel)]="payload.years_in_premises" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Years Elsewhere</label>
+        <input type="number" [(ngModel)]="payload.years_elsewhere" min="0" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Are Premises Shared with Others?</label>
+      <select [(ngModel)]="payload.shared_premises">
+        <option [value]="undefined">Select</option>
+        <option [value]="true">Yes</option>
+        <option [value]="false">No</option>
+      </select>
+    </div>
+    <div class="form-group" *ngIf="payload.shared_premises">
+      <label>If Yes, State Name</label>
+      <input type="text" [(ngModel)]="payload.shared_with_name" />
+    </div>
+    <div class="form-group">
+      <label>Usual Business Hours</label>
+      <input type="text" [(ngModel)]="payload.business_hours" placeholder="e.g., 9:00 AM - 6:00 PM" />
+    </div>
+  </div>
+
+  <!-- Step 2: Business & Employees -->
+  <div class="card" *ngIf="currentStep === 2">
+    <h2>2. Nature of Business & Employees</h2>
+    <h3>Nature of Business (Based on Sales)</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Manufacturing %</label>
+        <input type="number" [(ngModel)]="payload.manufacturing_percent" min="0" max="100" />
+      </div>
+      <div class="form-group">
+        <label>Wholesale %</label>
+        <input type="number" [(ngModel)]="payload.wholesale_percent" min="0" max="100" />
+      </div>
+      <div class="form-group">
+        <label>Retail %</label>
+        <input type="number" [(ngModel)]="payload.retail_percent" min="0" max="100" />
+      </div>
+    </div>
+    <h3>Employees</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Full Time Employees</label>
+        <input type="number" [(ngModel)]="payload.employees_full_time" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Part Time Employees</label>
+        <input type="number" [(ngModel)]="payload.employees_part_time" min="0" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Least Employees During Business Hours</label>
+        <input type="number" [(ngModel)]="payload.least_employees_during_hours" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Least Employees When Opening/Closing</label>
+        <input type="number" [(ngModel)]="payload.least_employees_opening_closing" min="0" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Number of Employees Under 12 Months</label>
+      <input type="number" [(ngModel)]="payload.employees_under_12_months" min="0" />
+    </div>
+  </div>
+
+  <!-- Step 3: Losses & History -->
+  <div class="card" *ngIf="currentStep === 3">
+    <h2>3. Losses & Insurance History</h2>
+    <h3>Losses (Past 5 Years)</h3>
+    <div *ngFor="let loss of payload.losses; let i = index" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 4px;">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date of Loss</label>
+          <input type="date" [(ngModel)]="loss.date" />
+        </div>
+        <div class="form-group">
+          <label>Amount of Loss</label>
+          <input type="number" [(ngModel)]="loss.amount" min="0" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Nature of Loss</label>
+        <input type="text" [(ngModel)]="loss.nature" />
+      </div>
+      <button type="button" class="btn btn-secondary" (click)="removeLoss(i)">Remove</button>
+    </div>
+    <button type="button" class="btn btn-secondary" (click)="addLoss()">Add Loss Record</button>
+
+    <div class="form-group" style="margin-top: 30px;">
+      <label>Particulars of Cancellations/Refusals</label>
+      <textarea [(ngModel)]="payload.cancellations_refusals" rows="3"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Member of Jewellers Security Alliance?</label>
+      <select [(ngModel)]="payload.jewellers_security_alliance_member">
+        <option [value]="undefined">Select</option>
+        <option [value]="true">Yes</option>
+        <option [value]="false">No</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Claims Settlement Basis</label>
+      <input type="text" [(ngModel)]="payload.claims_settlement_basis" placeholder="e.g., Cost Price" />
+    </div>
+  </div>
+
+  <!-- Step 4: Inventories -->
+  <div class="card" *ngIf="currentStep === 4">
+    <h2>4. Inventories</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Last Inventory Date</label>
+        <input type="date" [(ngModel)]="payload.last_inventory_date" />
+      </div>
+      <div class="form-group">
+        <label>Last Inventory Amount ($)</label>
+        <input type="number" [(ngModel)]="payload.last_inventory_amount" min="0" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Previous Inventory Date (6+ months prior)</label>
+        <input type="date" [(ngModel)]="payload.previous_inventory_date" />
+      </div>
+      <div class="form-group">
+        <label>Previous Inventory Amount ($)</label>
+        <input type="number" [(ngModel)]="payload.previous_inventory_amount" min="0" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Max Stock (Last 12 Months) ($)</label>
+        <input type="number" [(ngModel)]="payload.max_stock_12_months" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Min Stock (Last 12 Months) ($)</label>
+        <input type="number" [(ngModel)]="payload.min_stock_12_months" min="0" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Average Daily Amount of Others' Property ($)</label>
+      <input type="number" [(ngModel)]="payload.average_others_property" min="0" />
+    </div>
+    <h3>Stock Composition (%)</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Unset Diamonds</label>
+        <input type="number" [(ngModel)]="payload.stock_composition?.unset_diamonds_percent" min="0" max="100" />
+      </div>
+      <div class="form-group">
+        <label>Pearls</label>
+        <input type="number" [(ngModel)]="payload.stock_composition?.pearls_percent" min="0" max="100" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Other Precious Stones</label>
+        <input type="number" [(ngModel)]="payload.stock_composition?.other_precious_stones_percent" min="0" max="100" />
+      </div>
+      <div class="form-group">
+        <label>Other Stones Unset</label>
+        <input type="number" [(ngModel)]="payload.stock_composition?.other_stones_unset_percent" min="0" max="100" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Peak Season Additional Stock Value ($)</label>
+      <input type="number" [(ngModel)]="payload.peak_season_additional_stock" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Purchased Russian Origin Diamonds Since Jan 1, 2024?</label>
+      <select [(ngModel)]="payload.russian_diamonds_since_2024">
+        <option [value]="undefined">Select</option>
+        <option [value]="true">Yes</option>
+        <option [value]="false">No</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>How Often Do You Take Written Physical Stock Inventory?</label>
+      <input type="text" [(ngModel)]="payload.inventory_frequency" />
+    </div>
+  </div>
+
+  <!-- Step 5: Coverage & Limits -->
+  <div class="card" *ngIf="currentStep === 5">
+    <h2>5. Coverage & Limits</h2>
+    <h3>Optional Coverages</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Fire & Lightning Required?</label>
+        <select [(ngModel)]="payload.fire_lightning_required">
+          <option [value]="undefined">Select</option>
+          <option [value]="true">Yes</option>
+          <option [value]="false">No</option>
+        </select>
+      </div>
+      <div class="form-group" *ngIf="payload.fire_lightning_required">
+        <label>Fire Rate</label>
+        <input type="number" [(ngModel)]="payload.fire_rate" min="0" step="0.01" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Flood Required?</label>
+      <select [(ngModel)]="payload.flood_required">
+        <option [value]="undefined">Select</option>
+        <option [value]="true">Yes</option>
+        <option [value]="false">No</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Earthquake Required?</label>
+      <select [(ngModel)]="payload.earthquake_required">
+        <option [value]="undefined">Select</option>
+        <option [value]="true">Yes</option>
+        <option [value]="false">No</option>
+      </select>
+    </div>
+
+    <h3>Property at Premises Limits ($)</h3>
+    <div class="form-group">
+      <label>Stock (including others' goods)</label>
+      <input type="number" [(ngModel)]="payload.stock_limit" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Money in Locked Safe</label>
+      <input type="number" [(ngModel)]="payload.money_in_safe_limit" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Patterns, Moulds and Dies</label>
+      <input type="number" [(ngModel)]="payload.patterns_moulds_dies_limit" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Furniture, Fixtures, Machinery, Tools</label>
+      <input type="number" [(ngModel)]="payload.furniture_fixtures_limit" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Improvements and Betterments</label>
+      <input type="number" [(ngModel)]="payload.improvements_betterments_limit" min="0" />
+    </div>
+
+    <h3>Other Limits</h3>
+    <div class="form-group">
+      <label>Bank/Safe Deposit Vault Limit ($)</label>
+      <input type="number" [(ngModel)]="payload.bank_vault_limit" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Bank/Safe Deposit Vault Name & Address</label>
+      <textarea [(ngModel)]="payload.bank_vault_name_address" rows="2"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Memorandum Limit ($)</label>
+      <input type="number" [(ngModel)]="payload.memorandum_limit" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Registered Mail Limit ($)</label>
+      <input type="number" [(ngModel)]="payload.registered_mail_limit" min="0" />
+    </div>
+
+    <h3>Deductibles ($)</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Stock Deductible</label>
+        <select [(ngModel)]="payload.stock_deductible">
+          <option [value]="undefined">Select</option>
+          <option [value]="2500">$2,500</option>
+          <option [value]="5000">$5,000</option>
+          <option [value]="7500">$7,500</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Other Property Deductible</label>
+        <select [(ngModel)]="payload.other_property_deductible">
+          <option [value]="undefined">Select</option>
+          <option [value]="2500">$2,500</option>
+          <option [value]="5000">$5,000</option>
+          <option [value]="7500">$7,500</option>
+        </select>
+      </div>
+    </div>
+
+    <h3>Business Interruption</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Annual Gross Revenue ($)</label>
+        <input type="number" [(ngModel)]="payload.annual_gross_revenue" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Annual Profit ($)</label>
+        <input type="number" [(ngModel)]="payload.annual_profit" min="0" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Indemnity Period Required</label>
+      <select [(ngModel)]="payload.indemnity_period_months">
+        <option [value]="undefined">Select</option>
+        <option [value]="6">6 Months</option>
+        <option [value]="9">9 Months</option>
+        <option [value]="12">12 Months</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Step 6: Building & Security -->
+  <div class="card" *ngIf="currentStep === 6">
+    <h2>6. Building Details & Security</h2>
+    <h3>Building Details</h3>
+    <div class="form-group">
+      <label>Number of Storeys</label>
+      <input type="number" [(ngModel)]="payload.building_stories" min="1" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Walls</label>
+        <input type="text" [(ngModel)]="payload.building_walls" />
+      </div>
+      <div class="form-group">
+        <label>Roof</label>
+        <input type="text" [(ngModel)]="payload.building_roof" />
+      </div>
+      <div class="form-group">
+        <label>Floor</label>
+        <input type="text" [(ngModel)]="payload.building_floor" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Sprinkler?</label>
+        <select [(ngModel)]="payload.sprinkler">
+          <option [value]="undefined">Select</option>
+          <option [value]="true">Yes</option>
+          <option [value]="false">No</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Hydrant Protected?</label>
+        <select [(ngModel)]="payload.hydrant_protected">
+          <option [value]="undefined">Select</option>
+          <option [value]="true">Yes</option>
+          <option [value]="false">No</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Distance from Fire Hall</label>
+      <input type="text" [(ngModel)]="payload.distance_from_fire_hall" />
+    </div>
+
+    <h3>Alarm Systems</h3>
+    <div class="form-group">
+      <label>Mercantile Premises Alarm System?</label>
+      <select [(ngModel)]="payload.alarm_system?.mercantile_premises_alarm">
+        <option [value]="undefined">Select</option>
+        <option [value]="true">Yes</option>
+        <option [value]="false">No</option>
+      </select>
+    </div>
+    <div class="form-row" *ngIf="payload.alarm_system?.mercantile_premises_alarm">
+      <div class="form-group">
+        <label>Central Station?</label>
+        <select [(ngModel)]="payload.alarm_system?.central_station">
+          <option [value]="undefined">Select</option>
+          <option [value]="true">Yes</option>
+          <option [value]="false">No</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Local Alarm?</label>
+        <select [(ngModel)]="payload.alarm_system?.local_alarm">
+          <option [value]="undefined">Select</option>
+          <option [value]="true">Yes</option>
+          <option [value]="false">No</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Protective Company Name</label>
+      <input type="text" [(ngModel)]="payload.alarm_system?.company_name" />
+    </div>
+
+    <h3>Holdup Alarm</h3>
+    <div class="form-group">
+      <label>Central Station Holdup Alarm?</label>
+      <select [(ngModel)]="payload.holdup_alarm?.central_station_holdup">
+        <option [value]="undefined">Select</option>
+        <option [value]="true">Yes</option>
+        <option [value]="false">No</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Number of Signal Buttons</label>
+      <input type="number" [(ngModel)]="payload.holdup_alarm?.signal_buttons" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Cage or Double Entrance Trap?</label>
+      <select [(ngModel)]="payload.holdup_alarm?.cage_double_entrance">
+        <option [value]="undefined">Select</option>
+        <option [value]="true">Yes</option>
+        <option [value]="false">No</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>CCTV Monitoring?</label>
+      <select [(ngModel)]="payload.holdup_alarm?.cctv">
+        <option [value]="undefined">Select</option>
+        <option [value]="true">Yes</option>
+        <option [value]="false">No</option>
+      </select>
+    </div>
+
+    <h3>Safes & Vaults</h3>
+    <div *ngFor="let sv of payload.safes_vaults; let i = index" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 4px;">
+      <div class="form-group">
+        <label>Type</label>
+        <select [(ngModel)]="sv.type">
+          <option value="safe">Safe</option>
+          <option value="vault">Vault</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Make/Class/UL Rating</label>
+        <input type="text" [(ngModel)]="sv.make_class" />
+      </div>
+      <div class="form-group">
+        <label>Stock Percentage (%)</label>
+        <input type="number" [(ngModel)]="sv.stock_percent" min="0" max="100" />
+      </div>
+      <button type="button" class="btn btn-secondary" (click)="removeSafeVault(i)">Remove</button>
+    </div>
+    <button type="button" class="btn btn-secondary" (click)="addSafeVault()">Add Safe/Vault</button>
+  </div>
+
+  <!-- Step 7: Travellers & Windows -->
+  <div class="card" *ngIf="currentStep === 7">
+    <h2>7. Travellers & Show Windows</h2>
+    <h3>Travellers</h3>
+    <div *ngFor="let traveller of payload.travellers; let i = index" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 4px;">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" [(ngModel)]="traveller.name" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Days in City</label>
+          <input type="number" [(ngModel)]="traveller.days_in_city" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Days Elsewhere</label>
+          <input type="number" [(ngModel)]="traveller.days_elsewhere" min="0" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Average Amount ($)</label>
+        <input type="number" [(ngModel)]="traveller.average_amount" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Limit of Liability ($)</label>
+        <input type="number" [(ngModel)]="traveller.limit_liability" min="0" />
+      </div>
+      <button type="button" class="btn btn-secondary" (click)="removeTraveller(i)">Remove</button>
+    </div>
+    <button type="button" class="btn btn-secondary" (click)="addTraveller()">Add Traveller</button>
+
+    <h3>Show Window Display</h3>
+    <div class="form-group">
+      <label>Number of Show Windows (Opening into Interior)</label>
+      <input type="number" [(ngModel)]="payload.show_windows?.windows_opening_interior" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Number Protected Against Window Smashing</label>
+      <input type="number" [(ngModel)]="payload.show_windows?.windows_protected_count" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Protection Method</label>
+      <input type="text" [(ngModel)]="payload.show_windows?.windows_protection_method" />
+    </div>
+    <div class="form-group">
+      <label>Number of Outside Showcases</label>
+      <input type="number" [(ngModel)]="payload.show_windows?.outside_showcases_count" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Maximum Value Displayed - All Windows & Showcases ($)</label>
+      <input type="number" [(ngModel)]="payload.show_windows?.max_value_open_protected" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Maximum Value - Any One Window ($)</label>
+      <input type="number" [(ngModel)]="payload.show_windows?.max_value_one_window" min="0" />
+    </div>
+    <div class="form-group">
+      <label>Maximum Value - Any One Article ($)</label>
+      <input type="number" [(ngModel)]="payload.show_windows?.max_value_one_article" min="0" />
+    </div>
+  </div>
+
+  <!-- Step 8: Review & Submit -->
+  <div class="card" *ngIf="currentStep === 8">
+    <h2>8. Review & Submit</h2>
+    <p>Please review your application details before submitting.</p>
+    
+    <div style="margin: 20px 0;">
+      <h3>Summary</h3>
+      <p><strong>Firm Name:</strong> {{ payload.firm_name || 'Not provided' }}</p>
+      <p><strong>Premises Address:</strong> {{ payload.premises_address || 'Not provided' }}</p>
+      <p><strong>Total Stock Value:</strong> {{ calculateTotalStockValue() | number:'1.2-2' }}</p>
+      <p><strong>Annual Gross Revenue:</strong> {{ payload.annual_gross_revenue | number:'1.2-2' || 'Not provided' }}</p>
+    </div>
+
+    <div class="form-group">
+      <label>Insurance Start Date</label>
+      <input type="date" [(ngModel)]="payload.insurance_start_date" />
+    </div>
+
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+  </div>
+
+  <!-- Navigation Buttons -->
+  <div class="step-actions">
+    <button
+      type="button"
+      class="btn btn-secondary"
+      (click)="previousStep()"
+      [disabled]="currentStep === 1"
+    >
+      Previous
+    </button>
+    <button
+      *ngIf="currentStep < totalSteps"
+      type="button"
+      class="btn btn-primary"
+      (click)="nextStep()"
+    >
+      Next
+    </button>
+    <button
+      *ngIf="currentStep === totalSteps"
+      type="button"
+      class="btn btn-success"
+      (click)="onSubmit()"
+      [disabled]="loading"
+    >
+      {{ loading ? 'Submitting...' : 'Submit & Get Quote' }}
+    </button>
+  </div>
+</div>
