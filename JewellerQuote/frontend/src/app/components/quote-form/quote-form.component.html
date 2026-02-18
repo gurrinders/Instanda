@@ -5,7 +5,7 @@
   <div class="step-indicator">
     <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
       <div class="step-number">1</div>
-      <div class="step-title">Firm Details</div>
+      <div class="step-title">Account Details</div>
     </div>
     <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">
       <div class="step-number">2</div>
@@ -215,21 +215,21 @@
     <div class="form-row">
       <div class="form-group">
         <label>Unset Diamonds</label>
-        <input type="number" [(ngModel)]="payload.stock_composition?.unset_diamonds_percent" min="0" max="100" />
+        <input type="number" [(ngModel)]="payload.stock_composition" min="0" max="100" />
       </div>
       <div class="form-group">
         <label>Pearls</label>
-        <input type="number" [(ngModel)]="payload.stock_composition?.pearls_percent" min="0" max="100" />
+        <input type="number" [(ngModel)]="payload.stock_composition" min="0" max="100" />
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
         <label>Other Precious Stones</label>
-        <input type="number" [(ngModel)]="payload.stock_composition?.other_precious_stones_percent" min="0" max="100" />
+        <input type="number" [(ngModel)]="payload.stock_composition" min="0" max="100" />
       </div>
       <div class="form-group">
         <label>Other Stones Unset</label>
-        <input type="number" [(ngModel)]="payload.stock_composition?.other_stones_unset_percent" min="0" max="100" />
+        <input type="number" [(ngModel)]="payload.stock_composition" min="0" max="100" />
       </div>
     </div>
     <div class="form-group">
@@ -417,7 +417,7 @@
     <h3>Alarm Systems</h3>
     <div class="form-group">
       <label>Mercantile Premises Alarm System?</label>
-      <select [(ngModel)]="payload.alarm_system?.mercantile_premises_alarm">
+      <select [(ngModel)]="payload.alarm_system">
         <option [value]="undefined">Select</option>
         <option [value]="true">Yes</option>
         <option [value]="false">No</option>
@@ -426,7 +426,7 @@
     <div class="form-row" *ngIf="payload.alarm_system?.mercantile_premises_alarm">
       <div class="form-group">
         <label>Central Station?</label>
-        <select [(ngModel)]="payload.alarm_system?.central_station">
+        <select [(ngModel)]="payload.alarm_system">
           <option [value]="undefined">Select</option>
           <option [value]="true">Yes</option>
           <option [value]="false">No</option>
@@ -434,7 +434,7 @@
       </div>
       <div class="form-group">
         <label>Local Alarm?</label>
-        <select [(ngModel)]="payload.alarm_system?.local_alarm">
+        <select [(ngModel)]="payload.alarm_system">
           <option [value]="undefined">Select</option>
           <option [value]="true">Yes</option>
           <option [value]="false">No</option>
@@ -443,13 +443,13 @@
     </div>
     <div class="form-group">
       <label>Protective Company Name</label>
-      <input type="text" [(ngModel)]="payload.alarm_system?.company_name" />
+      <input type="text" [(ngModel)]="payload.alarm_system" />
     </div>
 
     <h3>Holdup Alarm</h3>
     <div class="form-group">
       <label>Central Station Holdup Alarm?</label>
-      <select [(ngModel)]="payload.holdup_alarm?.central_station_holdup">
+      <select [(ngModel)]="payload.holdup_alarm">
         <option [value]="undefined">Select</option>
         <option [value]="true">Yes</option>
         <option [value]="false">No</option>
@@ -457,11 +457,11 @@
     </div>
     <div class="form-group">
       <label>Number of Signal Buttons</label>
-      <input type="number" [(ngModel)]="payload.holdup_alarm?.signal_buttons" min="0" />
+      <input type="number" [(ngModel)]="payload.holdup_alarm" min="0" />
     </div>
     <div class="form-group">
       <label>Cage or Double Entrance Trap?</label>
-      <select [(ngModel)]="payload.holdup_alarm?.cage_double_entrance">
+      <select [(ngModel)]="payload.holdup_alarm">
         <option [value]="undefined">Select</option>
         <option [value]="true">Yes</option>
         <option [value]="false">No</option>
@@ -469,7 +469,7 @@
     </div>
     <div class="form-group">
       <label>CCTV Monitoring?</label>
-      <select [(ngModel)]="payload.holdup_alarm?.cctv">
+      <select [(ngModel)]="payload.holdup_alarm">
         <option [value]="undefined">Select</option>
         <option [value]="true">Yes</option>
         <option [value]="false">No</option>
@@ -532,31 +532,31 @@
     <h3>Show Window Display</h3>
     <div class="form-group">
       <label>Number of Show Windows (Opening into Interior)</label>
-      <input type="number" [(ngModel)]="payload.show_windows?.windows_opening_interior" min="0" />
+      <input type="number" [(ngModel)]="payload.show_windows" min="0" />
     </div>
     <div class="form-group">
       <label>Number Protected Against Window Smashing</label>
-      <input type="number" [(ngModel)]="payload.show_windows?.windows_protected_count" min="0" />
+      <input type="number" [(ngModel)]="payload.show_windows" min="0" />
     </div>
     <div class="form-group">
       <label>Protection Method</label>
-      <input type="text" [(ngModel)]="payload.show_windows?.windows_protection_method" />
+      <input type="text" [(ngModel)]="payload.show_windows" />
     </div>
     <div class="form-group">
       <label>Number of Outside Showcases</label>
-      <input type="number" [(ngModel)]="payload.show_windows?.outside_showcases_count" min="0" />
+      <input type="number" [(ngModel)]="payload.show_windows" min="0" />
     </div>
     <div class="form-group">
       <label>Maximum Value Displayed - All Windows & Showcases ($)</label>
-      <input type="number" [(ngModel)]="payload.show_windows?.max_value_open_protected" min="0" />
+      <input type="number" [(ngModel)]="payload.show_windows" min="0" />
     </div>
     <div class="form-group">
       <label>Maximum Value - Any One Window ($)</label>
-      <input type="number" [(ngModel)]="payload.show_windows?.max_value_one_window" min="0" />
+      <input type="number" [(ngModel)]="payload.show_windows" min="0" />
     </div>
     <div class="form-group">
       <label>Maximum Value - Any One Article ($)</label>
-      <input type="number" [(ngModel)]="payload.show_windows?.max_value_one_article" min="0" />
+      <input type="number" [(ngModel)]="payload.show_windows" min="0" />
     </div>
   </div>
 
@@ -568,9 +568,9 @@
     <div style="margin: 20px 0;">
       <h3>Summary</h3>
       <p><strong>Firm Name:</strong> {{ payload.firm_name || 'Not provided' }}</p>
-      <p><strong>Premises Address:</strong> {{ payload.premises_address || 'Not provided' }}</p>
-      <p><strong>Total Stock Value:</strong> {{ calculateTotalStockValue() | number:'1.2-2' }}</p>
-      <p><strong>Annual Gross Revenue:</strong> {{ payload.annual_gross_revenue | number:'1.2-2' || 'Not provided' }}</p>
+      <p><strong>Premises Address:</strong> {{ payload.premises_address }}</p>
+      <p><strong>Total Stock Value:</strong> {{ calculateTotalStockValue() }}</p>
+      <p><strong>Annual Gross Revenue:</strong> {{ payload.annual_gross_revenue}}</p>
     </div>
 
     <div class="form-group">

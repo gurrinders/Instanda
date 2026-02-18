@@ -11,9 +11,9 @@
 
     <div *ngIf="application">
       <h2>Application Details</h2>
-      <p><strong>Firm Name:</strong> {{ application.firm_name || 'N/A' }}</p>
-      <p><strong>Premises Address:</strong> {{ application.premises_address || 'N/A' }}</p>
-      <p><strong>Annual Gross Revenue:</strong> {{ application.annual_gross_revenue | number:'1.2-2' || 'N/A' }}</p>
+      <p><strong>Firm Name:</strong> {{ application.firm_name }}</p>
+      <p><strong>Premises Address:</strong> {{ application.premises_address }}</p>
+      <p><strong>Annual Gross Revenue:</strong> {{ application.annual_gross_revenue }}</p>
     </div>
 
     <div style="margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
