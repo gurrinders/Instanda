@@ -19,6 +19,22 @@ export class QuoteFormComponent implements OnInit {
   payload: ApplicationPayload = {};
   loading = false;
   errorMessage = '';
+  territoryOptions = ['Belgium', 'Canada', 'Europe', 'Hong Kong', 'Italy', 'Malaysia', 'Mexico', 'Switzerland', 'Thailand', 'UAE', 'USA'];
+  
+  territoryCurrencyMap: { [key: string]: string } = {
+    'Belgium': 'EUR',
+    'Canada': 'CAD',
+    'Europe': 'EUR',
+    'Hong Kong': 'HKD',
+    'Italy': 'EUR',
+    'Malaysia': 'MYR',
+    'Mexico': 'MXN',
+    'Switzerland': 'CHF',
+    'Thailand': 'THB',
+    'UAE': 'AED',
+    'USA': 'USD'
+  };
+  currencyOptions = Array.from(new Set(Object.values(this.territoryCurrencyMap))).sort();
 
   constructor(
     private applicationService: ApplicationService,
@@ -57,6 +73,12 @@ export class QuoteFormComponent implements OnInit {
   goToStep(step: number): void {
     if (step >= 1 && step <= this.totalSteps) {
       this.currentStep = step;
+    }
+  }
+
+  onTerritoryChange(): void {
+    if (this.payload.country && this.territoryCurrencyMap[this.payload.country]) {
+      this.payload.currency = this.territoryCurrencyMap[this.payload.country];
     }
   }
 
@@ -113,6 +135,7 @@ export class QuoteFormComponent implements OnInit {
 
     const applicationData: ApplicationCreate = {
       firm_name: this.payload.firm_name,
+      country: this.payload.country,
       premises_address: this.payload.premises_address,
       annual_gross_revenue: this.payload.annual_gross_revenue,
       annual_profit: this.payload.annual_profit,

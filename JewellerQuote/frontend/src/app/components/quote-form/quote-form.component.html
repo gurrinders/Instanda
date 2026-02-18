@@ -45,12 +45,19 @@
   <div class="card" *ngIf="currentStep === 1">
     <h2>1. Firm Definition</h2>
     <div class="form-group">
-      <label>Firm or Corporation Name *</label>
+      <label>Assured *</label>
       <input type="text" [(ngModel)]="payload.firm_name" required />
     </div>
     <div class="form-group">
-      <label>Names of Individuals with Proprietary/Financial Interest</label>
-      <textarea [(ngModel)]="payload.individuals_with_interest" rows="3"></textarea>
+      <label>Country / Territory</label>
+      <select [(ngModel)]="payload.country" (change)="onTerritoryChange()">
+        <option [value]="undefined">Select</option>
+        <option *ngFor="let t of territoryOptions" [value]="t">{{ t }}</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Currency</label>
+      <input type="text" [(ngModel)]=" payload.currency" disabled="true" />
     </div>
     <div class="form-group">
       <label>Officers & Directors</label>

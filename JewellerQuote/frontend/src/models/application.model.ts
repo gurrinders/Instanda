@@ -1,6 +1,8 @@
 export interface ApplicationPayload {
   // Section 1: Definition
   firm_name?: string;
+  country?: string;
+  currency?: string;
   individuals_with_interest?: string;
   officers_directors?: string;
   premises_address?: string;
@@ -231,6 +233,8 @@ export interface Application {
 
 export interface ApplicationCreate {
   firm_name?: string;
+  country?: string;
+  currency?: string;
   premises_address?: string;
   annual_gross_revenue?: number;
   annual_profit?: number;
