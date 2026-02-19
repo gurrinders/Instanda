@@ -9,7 +9,7 @@
     </div>
     <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">
       <div class="step-number">2</div>
-      <div class="step-title">Business & Employees</div>
+      <div class="step-title">Exposure Information</div>
     </div>
     <div class="step" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">
       <div class="step-number">3</div>
@@ -43,7 +43,7 @@
 
   <!-- Step 1: Firm Details -->
   <div class="card" *ngIf="currentStep === 1">
-    <h2>1. Firm Definition</h2>
+    <h2>1. Account Details</h2>
     <div class="form-group">
       <label>Assured *</label>
       <input type="text" [(ngModel)]="payload.firm_name" required />
@@ -60,84 +60,107 @@
       <input type="text" [(ngModel)]=" payload.currency" disabled="true" />
     </div>
     <div class="form-group">
-      <label>Officers & Directors</label>
-      <textarea [(ngModel)]="payload.officers_directors" rows="3"></textarea>
-    </div>
-    <div class="form-group">
-      <label>Premises Address *</label>
-      <textarea [(ngModel)]="payload.premises_address" rows="2" required></textarea>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Years in These Premises</label>
-        <input type="number" [(ngModel)]="payload.years_in_premises" min="0" />
-      </div>
-      <div class="form-group">
-        <label>Years Elsewhere</label>
-        <input type="number" [(ngModel)]="payload.years_elsewhere" min="0" />
+      <label>Exchange Rate</label>
+      <input type="number" [(ngModel)]="payload.exRate" #exRate="ngModel" required />
+      <div *ngIf="exRate.touched && !payload.exRate" class="text-danger">
+        Exchange Rate cannot be zero or blank
       </div>
     </div>
+     <div class="form-group">
+      <label>CAD Limit</label>
+      <input type="text" [ngModel]="payload.cadLimit | number:'1.0-0'" (ngModelChange)="payload.cadLimit = parseCurrency($event)" [ngModelOptions]="{updateOn: 'blur'}" />
+    </div>
+     <div class="form-group">
+      <label>CAD Excess</label>
+      <input type="text" [ngModel]="payload.cadExcess | number:'1.0-0'" (ngModelChange)="payload.cadExcess = parseCurrency($event)" [ngModelOptions]="{updateOn: 'blur'}" />
+    </div>
     <div class="form-group">
-      <label>Are Premises Shared with Others?</label>
-      <select [(ngModel)]="payload.shared_premises">
+      <label>USD Limit</label>
+      <input type="text" [value]="((payload.cadLimit || 0) * (payload.exRate || 0)) | number:'1.0-0'" disabled />
+    </div>
+    <div class="form-group">
+      <label>USD Excess</label>
+      <input type="text" [value]="((payload.cadExcess || 0) * (payload.exRate || 0)) | number:'1.0-0'" disabled />
+    </div>
+    <div class="form-group">
+      <label>Business Type</label>
+      <select [(ngModel)]="payload.business_type">
         <option [value]="undefined">Select</option>
-        <option [value]="true">Yes</option>
-        <option [value]="false">No</option>
+        <option *ngFor="let type of businessTypeOptions" [value]="type">{{ type }}</option>
       </select>
     </div>
-    <div class="form-group" *ngIf="payload.shared_premises">
-      <label>If Yes, State Name</label>
-      <input type="text" [(ngModel)]="payload.shared_with_name" />
+    <div class="form-group">
+      <label>Dropdown Clause</label>
+      <select [(ngModel)]="payload.dropdown_clause">
+        <option [value]="undefined">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
     </div>
     <div class="form-group">
-      <label>Usual Business Hours</label>
-      <input type="text" [(ngModel)]="payload.business_hours" placeholder="e.g., 9:00 AM - 6:00 PM" />
+      <label>Total Discounts</label>
+      <input type="number" [(ngModel)]=" payload.totalDiscounts" />
     </div>
   </div>
+    
+
+
+
+
+    
 
   <!-- Step 2: Business & Employees -->
   <div class="card" *ngIf="currentStep === 2">
-    <h2>2. Nature of Business & Employees</h2>
-    <h3>Nature of Business (Based on Sales)</h3>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Manufacturing %</label>
-        <input type="number" [(ngModel)]="payload.manufacturing_percent" min="0" max="100" />
-      </div>
-      <div class="form-group">
-        <label>Wholesale %</label>
-        <input type="number" [(ngModel)]="payload.wholesale_percent" min="0" max="100" />
-      </div>
-      <div class="form-group">
-        <label>Retail %</label>
-        <input type="number" [(ngModel)]="payload.retail_percent" min="0" max="100" />
-      </div>
-    </div>
-    <h3>Employees</h3>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Full Time Employees</label>
-        <input type="number" [(ngModel)]="payload.employees_full_time" min="0" />
-      </div>
-      <div class="form-group">
-        <label>Part Time Employees</label>
-        <input type="number" [(ngModel)]="payload.employees_part_time" min="0" />
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Least Employees During Business Hours</label>
-        <input type="number" [(ngModel)]="payload.least_employees_during_hours" min="0" />
-      </div>
-      <div class="form-group">
-        <label>Least Employees When Opening/Closing</label>
-        <input type="number" [(ngModel)]="payload.least_employees_opening_closing" min="0" />
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Number of Employees Under 12 Months</label>
-      <input type="number" [(ngModel)]="payload.employees_under_12_months" min="0" />
-    </div>
+    <h2>2. Exposure Information</h2>
+    <h3> Premises Exposure</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Label</th>
+          <th>Limit</th>
+          <th>Value</th>
+          <th>Premium</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let layer of layers; let i = index">
+          <td>{{ layer.label }}</td>
+          <td>{{ i === layers.length - 1 ? '> 5m' : (layer.limit | currency:'USD':'symbol':'1.0-0') }}</td>
+          <td>{{(layer.exposure | currency:'USD':'symbol':'1.0-0')}}</td>
+          <td>{{(layer.premium | currency:'USD':'symbol':'1.0-0')}}</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3" style="text-align: right; font-weight: bold;">Total Premium</td>
+          <td style="font-weight: bold;">{{ calculateTotalPremium() | currency:'USD':'symbol':'1.0-0' }}</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <h3>Additional Coverages</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Label</th>
+          <th>Limit</th>
+          <th>Premium</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let layer of otherLayers; let i = index">
+          <td>{{ layer.label }}</td>
+          <td><input type="text" [ngModel]="layer.limit | number:'1.0-0'" (ngModelChange)="updateOtherLayerLimit(layer, $event)" [ngModelOptions]="{updateOn: 'blur'}" /></td>
+          <td>{{(layer.premium | currency:'USD':'symbol':'1.0-0')}}</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2" style="text-align: right; font-weight: bold;">Total Premium</td>
+          <td style="font-weight: bold;">{{ calculateOtherLayersTotalPremium() | currency:'USD':'symbol':'1.0-0' }}</td>
+        </tr>
+      </tfoot>
+    </table>
   </div>
 
   <!-- Step 3: Losses & History -->
@@ -575,7 +598,6 @@
     <div style="margin: 20px 0;">
       <h3>Summary</h3>
       <p><strong>Firm Name:</strong> {{ payload.firm_name || 'Not provided' }}</p>
-      <p><strong>Premises Address:</strong> {{ payload.premises_address }}</p>
       <p><strong>Total Stock Value:</strong> {{ calculateTotalStockValue() }}</p>
       <p><strong>Annual Gross Revenue:</strong> {{ payload.annual_gross_revenue}}</p>
     </div>
@@ -605,6 +627,8 @@
       type="button"
       class="btn btn-primary"
       (click)="nextStep()"
+      [class.step-invalid]="currentStep === 1 && !isStep1Valid()"
+      [disabled]="currentStep === 1 && !isStep1Valid()"
     >
       Next
     </button>

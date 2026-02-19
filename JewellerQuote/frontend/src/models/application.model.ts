@@ -3,14 +3,14 @@ export interface ApplicationPayload {
   firm_name?: string;
   country?: string;
   currency?: string;
-  individuals_with_interest?: string;
-  officers_directors?: string;
-  premises_address?: string;
-  years_in_premises?: number;
-  years_elsewhere?: number;
-  shared_premises?: boolean;
-  shared_with_name?: string;
-  business_hours?: string;
+  exRate?: number;
+  cadLimit?: number;
+  cadExcess?: number;
+  limit_layers?: InsuranceLayer[];
+  totalDiscounts?: number;
+  business_type?: string;
+  dropdown_clause?: string;
+  
 
   // Section 2: Nature of Business
   manufacturing_percent?: number;
@@ -235,8 +235,25 @@ export interface ApplicationCreate {
   firm_name?: string;
   country?: string;
   currency?: string;
-  premises_address?: string;
-  annual_gross_revenue?: number;
-  annual_profit?: number;
-  raw_payload: ApplicationPayload;
+  exRate?: number;
+  cadLimit?: number;
+  cadExcess?: number;
+  totalDiscounts?: number;
+  business_type?: string;
+  dropdown_clause?: string;
+}
+
+export interface InsuranceLayer {
+  id: string;
+  label: string;
+  limit: number;      // How much this layer pays
+  excessOf: number;
+  exposure: number;
+  premium?: number;
+}
+
+export interface PremiumExposureRates {
+  layerId: string;
+  label: string;
+  rate: number;
 }

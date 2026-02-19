@@ -225,3 +225,9 @@ body {
   padding: 40px;
   color: #6c757d;
 }
+
+ .text-danger {
+      color: #dc3545;
+      font-size: 0.875em;
+      margin-top: 0.25rem;
+    }
