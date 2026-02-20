@@ -24,8 +24,12 @@ export interface ApplicationPayload {
   least_employees_opening_closing?: number;
   employees_under_12_months?: number;
 
-  // Section 4: Losses (array of loss records)
-  losses?: LossRecord[];
+  // Section 4: Travel (array of travel records)
+  travel?: TravelRecord[];
+  increase_limit_amount?: number;
+  increase_limit_days?: number;
+  unattended_vehicle_load_percent?: number;
+  nonStandardCoverage?: NonStandardCoverage[];
 
   // Section 5: Cancellations/Refusals
   cancellations_refusals?: string;
@@ -119,10 +123,15 @@ export interface ApplicationPayload {
   total_stock_value?: number;
 }
 
-export interface LossRecord {
-  date?: string;
-  amount?: number;
-  nature?: string;
+export interface TravelRecord {
+  limit?: number;
+  days?: number;
+  travel_type?: string;
+}
+
+export interface NonStandardCoverage {
+  type?: string;
+  loadCredit?: number;
 }
 
 export interface StockComposition {

@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApplicationService } from '../../../services/application.service';
 import { QuoteService } from '../../../services/quote.service';
-import { ApplicationPayload, ApplicationCreate, LossRecord, Traveller, SafeVault, InsuranceLayer, PremiumExposureRates } from '../../../models/application.model';
+import { ApplicationPayload, ApplicationCreate, TravelRecord, Traveller, SafeVault, InsuranceLayer, PremiumExposureRates, NonStandardCoverage } from '../../../models/application.model';
 
 @Component({
   selector: 'app-quote-form',
@@ -69,6 +69,39 @@ export class QuoteFormComponent implements OnInit {
     { layerId: 'travel', label: 'Incidental Travel', rate: 1 }
   ];
 
+  peakSeasonRate = 1.5;
+  travelPremiumRates = [
+    { layerId: '1', label: 'InTown', rate: 1.8 },
+    { layerId: '2', label: 'OutOfTown', rate: 4 },
+    { layerId: '3', label: 'International', rate: 7.5 }
+  ];
+
+  sendingPremiumRates = [
+    { layerId: '1', label: 'Armoured Car', rate: .025 },
+    { layerId: '2', label: 'Registered Airmail', rate: .125 },
+    { layerId: '3', label: 'FedEx / UPS / DHL', rate: .5 },
+    { layerId: '4', label: 'Secure Overnight', rate: .1 },
+    { layerId: '5', label: 'Other Method', rate: .5 }
+  ];
+
+  exhibitionPremiumRates = [
+    { layerId: '1', label: 'Including Shipments', rate: .075 },
+    { layerId: '2', label: 'Excluding Shipments', rate: .050 },
+  ];
+
+  sendingsLayers: InsuranceLayer[] = [
+    { id: '1', label: 'Armoured Car', limit: 0, excessOf: 0, exposure: 0 },
+    { id: '2', label: 'Registered Airmail', limit: 0, excessOf: 0, exposure: 0 },
+    { id: '3', label: 'FedEx / UPS / DHL', limit: 0, excessOf: 0, exposure: 0 },
+    { id: '4', label: 'Secure Overnight', limit: 0, excessOf: 0, exposure: 0 },
+    { id: '5', label: 'Other Method', limit: 0, excessOf: 0, exposure: 0 }
+  ];
+
+  exhibitionLayers: any[] = [
+    { id: '1', label: 'Including Shipments', limit: 0, no_of_shows: 0, premium: 0 },
+    { id: '2', label: 'Excluding Shipments', limit: 0, no_of_shows: 0, premium: 0 }
+  ];
+
 
   territoryCurrencyMap: { [key: string]: string } = {
     'Belgium': 'EUR',
@@ -106,7 +139,9 @@ export class QuoteFormComponent implements OnInit {
       business_type: 'Retailer',
       dropdown_clause: 'Yes',
       totalDiscounts: 30,
-      losses: [],
+      travel: [],
+      unattended_vehicle_load_percent: 0,
+      nonStandardCoverage: [],
       travellers: [],
       safes_vaults: [],
       stock_composition: {},
@@ -171,16 +206,29 @@ export class QuoteFormComponent implements OnInit {
     }
   }
 
-  addLoss(): void {
-    if (!this.payload.losses) {
-      this.payload.losses = [];
+  addTravel(): void {
+    if (!this.payload.travel) {
+      this.payload.travel = [];
     }
-    this.payload.losses.push({});
+    this.payload.travel.push({});
   }
 
-  removeLoss(index: number): void {
-    if (this.payload.losses) {
-      this.payload.losses.splice(index, 1);
+  removeTravel(index: number): void {
+    if (this.payload.travel) {
+      this.payload.travel.splice(index, 1);
+    }
+  }
+
+  addNonStandardCoverage(): void {
+    if (!this.payload.nonStandardCoverage) {
+      this.payload.nonStandardCoverage = [];
+    }
+    this.payload.nonStandardCoverage.push({});
+  }
+
+  removeNonStandardCoverage(index: number): void {
+    if (this.payload.nonStandardCoverage) {
+      this.payload.nonStandardCoverage.splice(index, 1);
     }
   }
 
@@ -233,6 +281,28 @@ export class QuoteFormComponent implements OnInit {
     }
   }
 
+  updateSendingLayerExposure(layer: InsuranceLayer, value: any): void {
+    const exposure = this.parseCurrency(value);
+    layer.exposure = exposure;
+
+    const rateObj = this.sendingPremiumRates.find(r => r.layerId === layer.id);
+    if (rateObj) {
+      layer.premium = exposure * (rateObj.rate / 100);
+    }
+  }
+
+  updateExhibitionLimit(layer: any, value: any): void {
+    layer.limit = this.parseCurrency(value);
+    this.calculateExhibitionPremium(layer);
+  }
+
+  calculateExhibitionPremium(layer: any): void {
+    const rateObj = this.exhibitionPremiumRates.find(r => r.layerId === layer.id);
+    if (rateObj) {
+      layer.premium = (layer.limit || 0) * (layer.no_of_shows || 0) * (rateObj.rate / 100);
+    }
+  }
+
   parseCurrency(value: any): number {
     if (typeof value === 'number') {
       return value;
@@ -241,6 +311,33 @@ export class QuoteFormComponent implements OnInit {
       return Number(value.replace(/[^0-9.-]+/g, ''));
     }
     return 0;
+  }
+
+  getTravelRate(layerId: string | undefined): number {
+    const rateObj = this.travelPremiumRates.find(r => r.layerId === layerId);
+    return rateObj ? rateObj.rate : 0;
+  }
+
+  calculateTotalTravelPremium(): number {
+    if (!this.payload.travel || this.payload.travel.length === 0) {
+      return 0;
+    }
+    return this.payload.travel.reduce((acc, item) => {
+      const rate = this.getTravelRate(item.travel_type) / 100;
+      const premium = (item.limit || 0) * (item.days || 0) / 250 * rate;
+      return acc + premium;
+    }, 0);
+  }
+
+  calculateFinalTravelPremium(): number {
+    const totalTravelPremium = this.calculateTotalTravelPremium();
+    const loadFactor = 1 + ((this.payload.unattended_vehicle_load_percent || 0) / 100);
+    let total = totalTravelPremium * loadFactor;
+
+    total += (this.payload.increase_limit_amount || 0) * (this.payload.increase_limit_days || 0) / 365 * 0.5;
+    total += this.sendingsLayers.reduce((acc, layer) => acc + (layer.premium || 0), 0);
+    total += this.exhibitionLayers.reduce((acc, layer) => acc + (layer.premium || 0), 0);
+    return total;
   }
 
   isStep1Valid(): boolean {
