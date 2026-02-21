@@ -133,7 +133,7 @@
       <tfoot>
         <tr>
           <td colspan="3" style="text-align: right; font-weight: bold;">Total Premium</td>
-          <td style="font-weight: bold;">{{ calculateTotalPremium() | currency:'USD':'symbol':'1.0-0' }}</td>
+          <td style="font-weight: bold;">{{ calculateTotalExposurePremium() | currency:'USD':'symbol':'1.0-0' }}</td>
         </tr>
       </tfoot>
     </table>
@@ -157,7 +157,7 @@
       <tfoot>
         <tr>
           <td colspan="2" style="text-align: right; font-weight: bold;">Total Premium</td>
-          <td style="font-weight: bold;">{{ calculateOtherLayersTotalPremium() | currency:'USD':'symbol':'1.0-0' }}</td>
+          <td style="font-weight: bold;">{{ calculateOtherExposureTotalPremium() | currency:'USD':'symbol':'1.0-0' }}</td>
         </tr>
       </tfoot>
     </table>
@@ -166,13 +166,14 @@
   <!-- Step 3: Losses & History -->
   <div class="card" *ngIf="currentStep === 3">
     <h2>3. Travel & History</h2>
-    <h3>Temporary Increase in Limit</h3>
+    <h3>Peak Season</h3>
     <table class="table">
       <thead>
         <tr>
           <th>Description</th>
           <th>Limit</th>
           <th>Number of Days</th>
+          <th>Rate</th>
           <th>Premium</th>
         </tr>
       </thead>
@@ -185,7 +186,10 @@
           <td>
             <div class="form-group" style="margin-bottom: 0;"><input type="number" [(ngModel)]="payload.increase_limit_days" style="width: 100%;" /></div>
           </td>
-          <td>{{ ((payload.increase_limit_amount || 0) * (payload.increase_limit_days || 0) / 365 * 0.5) | currency:'USD':'symbol':'1.2-2' }}</td>
+          <td>
+            <div class="form-group" style="margin-bottom: 0;"><input type="number" [(ngModel)]="payload.peak_season_rate" step="0.01" style="width: 100%;" /></div>
+          </td>
+          <td>{{ calculatePeakSeasonPremium(payload) | currency:'USD':'symbol':'1.2-2' }}</td>
         </tr>
       </tbody>
     </table>
@@ -225,6 +229,11 @@
       <input type="number" [(ngModel)]="payload.unattended_vehicle_load_percent" style="width: 100px;" />
     </div>
 
+    <div class="form-group" style="text-align: right; margin-top: 20px;">
+      <label style="font-weight: bold; margin-right: 10px;">Total Travel Premium:</label>
+      <span style="font-weight: bold; font-size: 1.2em;">{{ calculateTotalTravePremium() | currency:'USD':'symbol':'1.2-2' }}</span>
+    </div>
+
     <h3>Sendings</h3>
     <table class="table">
       <thead>
@@ -246,6 +255,11 @@
         </tr>
       </tbody>
     </table>
+
+    <div class="form-group" style="text-align: right; margin-top: 20px;">
+      <label style="font-weight: bold; margin-right: 10px;">Total Sendings Premium:</label>
+      <span style="font-weight: bold; font-size: 1.2em;">{{ calculateTotalSendingPremium() | currency:'USD':'symbol':'1.2-2' }}</span>
+    </div>
 
     <h3>Exhibitions</h3>
     <table class="table">
@@ -274,9 +288,13 @@
         </tr>
       </tbody>
     </table>
+    <div class="form-group" style="text-align: right; margin-top: 20px;">
+      <label style="font-weight: bold; margin-right: 10px;">Total Exhibitions Premium:</label>
+      <span style="font-weight: bold; font-size: 1.2em;">{{ calculateTotalExhibitionPremium() | currency:'USD':'symbol':'1.2-2' }}</span>
+    </div>
 
     <div class="form-group" style="text-align: right; margin-top: 20px;">
-      <label style="font-weight: bold; margin-right: 10px;">Total Premium:</label>
+      <label style="font-weight: bold; margin-right: 10px;">Exposure Premium:</label>
       <span style="font-weight: bold; font-size: 1.2em;">{{ calculateFinalTravelPremium() | currency:'USD':'symbol':'1.2-2' }}</span>
     </div>
   </div>
@@ -303,125 +321,110 @@
       <button type="button" class="btn btn-secondary" (click)="removeNonStandardCoverage(i)">Remove</button>
     </div>
     <button type="button" class="btn btn-secondary" (click)="addNonStandardCoverage()">Add Non-Standard Coverage</button>
+    <div class="form-row" style="margin-top: 10px;">
+      <div class="form-group">
+        <label></label>
+        <input type="text" value="Total Load / (Credit) & Premium:" disabled style="border: none; background: transparent; font-weight: bold; padding-left: 0;" />
+      </div>
+      <div class="form-group">
+        <label>Total Load/Credit (%)</label>
+        <input type="number" [value]="calculateTotalNonStandardLoadCredit()" disabled />
+      </div>
+      <div class="form-group">
+        <label>Total Load/Credit Premium</label>
+        <input type="text" [value]="calculateTotalNonStandardPremium() | currency:'USD':'symbol':'1.2-2'" disabled />
+      </div>
+    </div>
+
+    <hr />
+    <h3>Deductibles</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Load/Credit (%)</th>
+          <th>Premium</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of payload.deductibles">
+          <td>{{ item.type }}</td>
+          <td>
+            <div class="form-group" style="margin-bottom: 0;">
+              <input type="number" [(ngModel)]="item.amount" step="1" style="width: 100%;" />
+            </div>
+          </td>
+          <td>
+            <div class="form-group" style="margin-bottom: 0;">
+              <input type="number" [(ngModel)]="item.loadCredit" style="width: 100%;" />
+            </div>
+          </td>
+          <td>
+            <input type="text" [value]="calculateDeductiblePremium(item) | currency:'USD':'symbol':'1.2-2'" disabled style="width: 100%; border: none; background: transparent;" />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="form-row" style="margin-top: 10px;">
+      <div class="form-group">
+        <label></label>
+        <input type="text" value="Total Load / (Credit) & Premium:" disabled style="border: none; background: transparent; font-weight: bold; padding-left: 0;" />
+      </div>
+      <div class="form-group">
+        <label>Total Load/Credit (%)</label>
+        <input type="number" [value]="calculateTotalDeductibleLoadCredit()" disabled />
+      </div>
+      <div class="form-group">
+        <label>Total Load/Credit Premium</label>
+        <input type="text" [value]="calculateTotalDeductiblePremium() | currency:'USD':'symbol':'1.2-2'" disabled />
+      </div>
+    </div>
+    <div class="form-row" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
+      <div class="form-group">
+        <label style="font-weight: bold;">Mechanical Premium</label>
+        <input type="text" [value]="calculateMechanicalPremium() | currency:'USD':'symbol':'1.2-2'" disabled style="font-weight: bold;" />
+      </div>
+    </div>
   </div>
 
   <!-- Step 5: Coverage & Limits -->
   <div class="card" *ngIf="currentStep === 5">
-    <h2>5. Coverage & Limits</h2>
-    <h3>Optional Coverages</h3>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Fire & Lightning Required?</label>
-        <select [(ngModel)]="payload.fire_lightning_required">
-          <option [value]="undefined">Select</option>
-          <option [value]="true">Yes</option>
-          <option [value]="false">No</option>
-        </select>
-      </div>
-      <div class="form-group" *ngIf="payload.fire_lightning_required">
-        <label>Fire Rate</label>
-        <input type="number" [(ngModel)]="payload.fire_rate" min="0" step="0.01" />
-      </div>
-    </div>
+    <h2>5. Risk Assessment</h2>
+    <h3>Adjustments</h3>
     <div class="form-group">
-      <label>Flood Required?</label>
-      <select [(ngModel)]="payload.flood_required">
-        <option [value]="undefined">Select</option>
-        <option [value]="true">Yes</option>
-        <option [value]="false">No</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Earthquake Required?</label>
-      <select [(ngModel)]="payload.earthquake_required">
-        <option [value]="undefined">Select</option>
-        <option [value]="true">Yes</option>
-        <option [value]="false">No</option>
-      </select>
+      <label>Percentage of exposure (%)</label>
+      <input type="number" [(ngModel)]="payload.percentage_of_exposure" (ngModelChange)="updateFirstLossAdjustment()" />
     </div>
 
-    <h3>Property at Premises Limits ($)</h3>
-    <div class="form-group">
-      <label>Stock (including others' goods)</label>
-      <input type="number" [(ngModel)]="payload.stock_limit" min="0" />
-    </div>
-    <div class="form-group">
-      <label>Money in Locked Safe</label>
-      <input type="number" [(ngModel)]="payload.money_in_safe_limit" min="0" />
-    </div>
-    <div class="form-group">
-      <label>Patterns, Moulds and Dies</label>
-      <input type="number" [(ngModel)]="payload.patterns_moulds_dies_limit" min="0" />
-    </div>
-    <div class="form-group">
-      <label>Furniture, Fixtures, Machinery, Tools</label>
-      <input type="number" [(ngModel)]="payload.furniture_fixtures_limit" min="0" />
-    </div>
-    <div class="form-group">
-      <label>Improvements and Betterments</label>
-      <input type="number" [(ngModel)]="payload.improvements_betterments_limit" min="0" />
-    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Adjustments</th>
+          <th>Load/Credit (%)</th>
+          <th>Premium</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of payload.adjustments; let i = index">
+          <td>
+            <input type="text" [(ngModel)]="item.description" style="width: 100%;" />
+          </td>
+          <td>
+            <input type="number" [(ngModel)]="item.loadCredit" [disabled]="i === 0" style="width: 100%;" />
+          </td>
+          <td>
+            <input type="text" [value]="calculateAdjustmentPremium(item) | currency:'USD':'symbol':'1.2-2'" disabled style="width: 100%; border: none; background: transparent;" />
+          </td>
+          <td><button type="button" class="btn btn-secondary" (click)="removeAdjustment(i)" *ngIf="i >= 4">Remove</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <button type="button" class="btn btn-secondary" (click)="addAdjustment()">Add Adjustment</button>
+    
 
-    <h3>Other Limits</h3>
-    <div class="form-group">
-      <label>Bank/Safe Deposit Vault Limit ($)</label>
-      <input type="number" [(ngModel)]="payload.bank_vault_limit" min="0" />
-    </div>
-    <div class="form-group">
-      <label>Bank/Safe Deposit Vault Name & Address</label>
-      <textarea [(ngModel)]="payload.bank_vault_name_address" rows="2"></textarea>
-    </div>
-    <div class="form-group">
-      <label>Memorandum Limit ($)</label>
-      <input type="number" [(ngModel)]="payload.memorandum_limit" min="0" />
-    </div>
-    <div class="form-group">
-      <label>Registered Mail Limit ($)</label>
-      <input type="number" [(ngModel)]="payload.registered_mail_limit" min="0" />
-    </div>
-
-    <h3>Deductibles ($)</h3>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Stock Deductible</label>
-        <select [(ngModel)]="payload.stock_deductible">
-          <option [value]="undefined">Select</option>
-          <option [value]="2500">$2,500</option>
-          <option [value]="5000">$5,000</option>
-          <option [value]="7500">$7,500</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Other Property Deductible</label>
-        <select [(ngModel)]="payload.other_property_deductible">
-          <option [value]="undefined">Select</option>
-          <option [value]="2500">$2,500</option>
-          <option [value]="5000">$5,000</option>
-          <option [value]="7500">$7,500</option>
-        </select>
-      </div>
-    </div>
-
-    <h3>Business Interruption</h3>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Annual Gross Revenue ($)</label>
-        <input type="number" [(ngModel)]="payload.annual_gross_revenue" min="0" />
-      </div>
-      <div class="form-group">
-        <label>Annual Profit ($)</label>
-        <input type="number" [(ngModel)]="payload.annual_profit" min="0" />
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Indemnity Period Required</label>
-      <select [(ngModel)]="payload.indemnity_period_months">
-        <option [value]="undefined">Select</option>
-        <option [value]="6">6 Months</option>
-        <option [value]="9">9 Months</option>
-        <option [value]="12">12 Months</option>
-      </select>
-    </div>
+    
   </div>
 
   <!-- Step 6: Building & Security -->

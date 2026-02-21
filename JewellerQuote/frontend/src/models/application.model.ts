@@ -6,30 +6,31 @@ export interface ApplicationPayload {
   exRate?: number;
   cadLimit?: number;
   cadExcess?: number;
-  limit_layers?: InsuranceLayer[];
   totalDiscounts?: number;
   business_type?: string;
   dropdown_clause?: string;
   
 
   // Section 2: Nature of Business
+  limit_layers?: InsuranceLayer[];
+  other_layers?: InsuranceLayer[];
   manufacturing_percent?: number;
   wholesale_percent?: number;
   retail_percent?: number;
-
   // Section 3: Employees
-  employees_full_time?: number;
-  employees_part_time?: number;
-  least_employees_during_hours?: number;
-  least_employees_opening_closing?: number;
-  employees_under_12_months?: number;
-
-  // Section 4: Travel (array of travel records)
   travel?: TravelRecord[];
   increase_limit_amount?: number;
   increase_limit_days?: number;
-  unattended_vehicle_load_percent?: number;
+  peak_season_rate?: number;
+   unattended_vehicle_load_percent?: number;
+   percentage_of_exposure?: number;
+   adjustments?: Adjustment[];
+
+  // Section 4: Travel (array of travel records)
+ 
+ 
   nonStandardCoverage?: NonStandardCoverage[];
+  deductibles?: Deductibles[];
 
   // Section 5: Cancellations/Refusals
   cancellations_refusals?: string;
@@ -132,6 +133,19 @@ export interface TravelRecord {
 export interface NonStandardCoverage {
   type?: string;
   loadCredit?: number;
+}
+
+export interface Deductibles {
+  type?: string;
+  amount?: number;
+  loadCredit?: number;
+  premium?: number;
+}
+
+export interface Adjustment {
+  description?: string;
+  loadCredit?: number;
+  premium?: number;
 }
 
 export interface StockComposition {
