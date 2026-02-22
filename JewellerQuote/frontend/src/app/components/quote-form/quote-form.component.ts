@@ -237,6 +237,7 @@ export class QuoteFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.initializePayload();
+    this.loadProgress();
   }
 
   initializePayload(): void {
@@ -260,6 +261,8 @@ export class QuoteFormComponent implements OnInit {
         { description: 'Geographical crime stats', loadCredit: 0, premium: 0 },
         { description: 'Departure from 10% PC on net', loadCredit: 0, premium: 0 }
       ],
+      loss_history_percentage: 0,
+      loss_history_load_credit: 0,
       nonStandardCoverage: [],
       deductibles: this.deductibleOptions.map(type => ({ type, amount: 0, loadCredit: 0 })),
       travellers: [],
@@ -532,7 +535,7 @@ export class QuoteFormComponent implements OnInit {
     });
 
     if (match) {
-      this.payload.adjustments[0].loadCredit = match.load;
+      this.payload.adjustments[0].loadCredit = -(100 - match.load);
     }
   }
 
@@ -549,6 +552,27 @@ export class QuoteFormComponent implements OnInit {
 
   removeAdjustment(index: number): void {
     if (this.payload.adjustments) this.payload.adjustments.splice(index, 1);
+  }
+
+  calculateTotalAdjustmentLoadCredit(): number {
+    if (!this.payload.adjustments) return 0;
+    // Exclude the first one (First Loss Adjustment)
+    return this.payload.adjustments.slice(1).reduce((sum, item) => sum + (Number(item.loadCredit) || 0), 0);
+  }
+
+  calculateTotalAdjustmentPremium(): number {
+    if (!this.payload.adjustments) return 0;
+    return this.payload.adjustments.reduce((sum, item) => sum + (item.premium || 0), 0);
+  }
+
+  calculateLossHistoryPremium(): number {
+    const base = this.calculateMechanicalPremium();
+    const loadCredit = (this.payload as any).loss_history_load_credit || 0;
+    return base * (loadCredit / 100);
+  }
+
+  calculateTechnicalPremium(): number {
+    return this.calculateMechanicalPremium() + this.calculateTotalAdjustmentPremium() + this.calculateLossHistoryPremium();
   }
 
   calculateTotalTravePremium() {
@@ -569,6 +593,23 @@ export class QuoteFormComponent implements OnInit {
     total += (this.payload.increase_limit_amount || 0) * (this.payload.increase_limit_days || 0) / 365 * (this.payload.peak_season_rate || 0);
     this.totalTravelExposurePremium = total;
     return total;
+  }
+
+  saveProgress(): void {
+    localStorage.setItem('jeweller_quote_payload', JSON.stringify(this.payload));
+    alert('Progress saved successfully!');
+  }
+
+  loadProgress(): void {
+    const savedPayload = localStorage.getItem('jeweller_quote_payload');
+
+    if (savedPayload) {
+      try {
+        this.payload = JSON.parse(savedPayload);
+      } catch (e) {
+        console.error('Error parsing saved payload', e);
+      }
+    }
   }
 
   isStep1Valid(): boolean {

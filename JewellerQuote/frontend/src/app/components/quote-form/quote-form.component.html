@@ -17,22 +17,14 @@
     </div>
     <div class="step" [class.active]="currentStep === 4" [class.completed]="currentStep > 4">
       <div class="step-number">4</div>
-      <div class="step-title">Inventories</div>
+      <div class="step-title">Coverage Information</div>
     </div>
     <div class="step" [class.active]="currentStep === 5" [class.completed]="currentStep > 5">
       <div class="step-number">5</div>
-      <div class="step-title">Coverage & Limits</div>
+      <div class="step-title">Risk Assessment & Loss History</div>
     </div>
     <div class="step" [class.active]="currentStep === 6" [class.completed]="currentStep > 6">
       <div class="step-number">6</div>
-      <div class="step-title">Building & Security</div>
-    </div>
-    <div class="step" [class.active]="currentStep === 7" [class.completed]="currentStep > 7">
-      <div class="step-number">7</div>
-      <div class="step-title">Travellers & Windows</div>
-    </div>
-    <div class="step" [class.active]="currentStep === 8" [class.completed]="currentStep > 8">
-      <div class="step-number">8</div>
       <div class="step-title">Review & Submit</div>
     </div>
   </div>
@@ -420,206 +412,85 @@
           <td><button type="button" class="btn btn-secondary" (click)="removeAdjustment(i)" *ngIf="i >= 4">Remove</button></td>
         </tr>
       </tbody>
+      <tfoot>
+        <tr>
+          <td style="font-weight: bold;">Total Load / Credit & Premium:</td>
+          <td>
+            <input type="number" [value]="calculateTotalAdjustmentLoadCredit()" disabled style="width: 100%; font-weight: bold;" />
+          </td>
+          <td>
+            <input type="text" [value]="calculateTotalAdjustmentPremium() | currency:'USD':'symbol':'1.2-2'" disabled style="width: 100%; border: none; background: transparent; font-weight: bold;" />
+          </td>
+          <td></td>
+        </tr>
+      </tfoot>
     </table>
     <button type="button" class="btn btn-secondary" (click)="addAdjustment()">Add Adjustment</button>
+
+    <h3>Loss History</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Loss Ratio</th>
+          <th>Percentage</th>
+          <th>Load/Credit</th>
+          <th>Premium</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Loss Ratio</td>
+          <td><input type="number" [(ngModel)]="payload.loss_history_percentage" style="width: 100%;" /></td>
+          <td><input type="number" [(ngModel)]="payload.loss_history_load_credit" style="width: 100%;" /></td>
+          <td><input type="text" [value]="calculateLossHistoryPremium() | currency:'USD':'symbol':'1.2-2'" disabled style="width: 100%; border: none; background: transparent;" /></td>
+        </tr>
+      </tbody>
+    </table>
+   
+    <div class="form-row" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
+      <div class="form-group">
+        <label style="font-weight: bold;">Technical Premium</label>
+        <input type="text" [value]="calculateTechnicalPremium() | currency:'USD':'symbol':'1.2-2'" disabled style="font-weight: bold;" />
+      </div>
+    </div>
+
+     <h3>Premium</h3>
+     <div class="form-group">
+       <label>Custom Discount (%)</label>
+       <input type="number" [(ngModel)]="payload.custom_discount" />
+     </div>
+     <table class="table">
+      <thead>
+        <tr>
+          <th>Label</th>
+          <th>Premium in CAD</th> 
+          <th>Mechanical Premium</th>
+          <th>Ratio</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sold Premium with Total Discounts of {{payload.totalDiscounts}}%</td>
+          <td><input type="text" [value]="calculateFinalTravelPremium() | currency:'USD':'symbol':'1.2-2'" disabled style="width: 100%; border: none; background: transparent;" /></td>
+          <td><input type="text" [value]="calculateMechanicalPremium() | currency:'USD':'symbol':'1.2-2'" disabled style="width: 100%; border: none; background: transparent;" /></td>
+          <td><input type="text" [value]="((calculateFinalTravelPremium() * (1 - (payload.totalDiscounts || 0)/100) / (1 - (payload.custom_discount || 0)/100)) / (calculateMechanicalPremium() || 1)) | number:'1.2-2'" disabled style="width: 100%; border: none; background: transparent;" /></td>
+        </tr>
+        <tr>
+          <td>Premium with {{payload.custom_discount}}% Total Discounts</td>
+          <td><input type="text" [value]="(calculateFinalTravelPremium() * (1 - (payload.totalDiscounts || 0)/100) / (1 - (payload.custom_discount || 0)/100)) | currency:'USD':'symbol':'1.2-2'" disabled style="width: 100%; border: none; background: transparent;" /></td>
+          <td><input type="text" [value]="calculateTechnicalPremium() | currency:'USD':'symbol':'1.2-2'" disabled style="width: 100%; border: none; background: transparent;" /></td>
+          <td><input type="text" [value]="((calculateFinalTravelPremium() * (1 - (payload.totalDiscounts || 0)/100) / (1 - (payload.custom_discount || 0)/100)) / (calculateTechnicalPremium() || 1)) | number:'1.2-2'" disabled style="width: 100%; border: none; background: transparent;" /></td>
+        </tr>
+      </tbody>
+    </table>
+     
     
 
     
-  </div>
-
-  <!-- Step 6: Building & Security -->
-  <div class="card" *ngIf="currentStep === 6">
-    <h2>6. Building Details & Security</h2>
-    <h3>Building Details</h3>
-    <div class="form-group">
-      <label>Number of Storeys</label>
-      <input type="number" [(ngModel)]="payload.building_stories" min="1" />
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Walls</label>
-        <input type="text" [(ngModel)]="payload.building_walls" />
-      </div>
-      <div class="form-group">
-        <label>Roof</label>
-        <input type="text" [(ngModel)]="payload.building_roof" />
-      </div>
-      <div class="form-group">
-        <label>Floor</label>
-        <input type="text" [(ngModel)]="payload.building_floor" />
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Sprinkler?</label>
-        <select [(ngModel)]="payload.sprinkler">
-          <option [value]="undefined">Select</option>
-          <option [value]="true">Yes</option>
-          <option [value]="false">No</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Hydrant Protected?</label>
-        <select [(ngModel)]="payload.hydrant_protected">
-          <option [value]="undefined">Select</option>
-          <option [value]="true">Yes</option>
-          <option [value]="false">No</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Distance from Fire Hall</label>
-      <input type="text" [(ngModel)]="payload.distance_from_fire_hall" />
-    </div>
-
-    <h3>Alarm Systems</h3>
-    <div class="form-group">
-      <label>Mercantile Premises Alarm System?</label>
-      <select [(ngModel)]="payload.alarm_system">
-        <option [value]="undefined">Select</option>
-        <option [value]="true">Yes</option>
-        <option [value]="false">No</option>
-      </select>
-    </div>
-    <div class="form-row" *ngIf="payload.alarm_system?.mercantile_premises_alarm">
-      <div class="form-group">
-        <label>Central Station?</label>
-        <select [(ngModel)]="payload.alarm_system">
-          <option [value]="undefined">Select</option>
-          <option [value]="true">Yes</option>
-          <option [value]="false">No</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Local Alarm?</label>
-        <select [(ngModel)]="payload.alarm_system">
-          <option [value]="undefined">Select</option>
-          <option [value]="true">Yes</option>
-          <option [value]="false">No</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Protective Company Name</label>
-      <input type="text" [(ngModel)]="payload.alarm_system" />
-    </div>
-
-    <h3>Holdup Alarm</h3>
-    <div class="form-group">
-      <label>Central Station Holdup Alarm?</label>
-      <select [(ngModel)]="payload.holdup_alarm">
-        <option [value]="undefined">Select</option>
-        <option [value]="true">Yes</option>
-        <option [value]="false">No</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Number of Signal Buttons</label>
-      <input type="number" [(ngModel)]="payload.holdup_alarm" min="0" />
-    </div>
-    <div class="form-group">
-      <label>Cage or Double Entrance Trap?</label>
-      <select [(ngModel)]="payload.holdup_alarm">
-        <option [value]="undefined">Select</option>
-        <option [value]="true">Yes</option>
-        <option [value]="false">No</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>CCTV Monitoring?</label>
-      <select [(ngModel)]="payload.holdup_alarm">
-        <option [value]="undefined">Select</option>
-        <option [value]="true">Yes</option>
-        <option [value]="false">No</option>
-      </select>
-    </div>
-
-    <h3>Safes & Vaults</h3>
-    <div *ngFor="let sv of payload.safes_vaults; let i = index" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 4px;">
-      <div class="form-group">
-        <label>Type</label>
-        <select [(ngModel)]="sv.type">
-          <option value="safe">Safe</option>
-          <option value="vault">Vault</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Make/Class/UL Rating</label>
-        <input type="text" [(ngModel)]="sv.make_class" />
-      </div>
-      <div class="form-group">
-        <label>Stock Percentage (%)</label>
-        <input type="number" [(ngModel)]="sv.stock_percent" min="0" max="100" />
-      </div>
-      <button type="button" class="btn btn-secondary" (click)="removeSafeVault(i)">Remove</button>
-    </div>
-    <button type="button" class="btn btn-secondary" (click)="addSafeVault()">Add Safe/Vault</button>
-  </div>
-
-  <!-- Step 7: Travellers & Windows -->
-  <div class="card" *ngIf="currentStep === 7">
-    <h2>7. Travellers & Show Windows</h2>
-    <h3>Travellers</h3>
-    <div *ngFor="let traveller of payload.travellers; let i = index" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 4px;">
-      <div class="form-group">
-        <label>Name</label>
-        <input type="text" [(ngModel)]="traveller.name" />
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Days in City</label>
-          <input type="number" [(ngModel)]="traveller.days_in_city" min="0" />
-        </div>
-        <div class="form-group">
-          <label>Days Elsewhere</label>
-          <input type="number" [(ngModel)]="traveller.days_elsewhere" min="0" />
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Average Amount ($)</label>
-        <input type="number" [(ngModel)]="traveller.average_amount" min="0" />
-      </div>
-      <div class="form-group">
-        <label>Limit of Liability ($)</label>
-        <input type="number" [(ngModel)]="traveller.limit_liability" min="0" />
-      </div>
-      <button type="button" class="btn btn-secondary" (click)="removeTraveller(i)">Remove</button>
-    </div>
-    <button type="button" class="btn btn-secondary" (click)="addTraveller()">Add Traveller</button>
-
-    <h3>Show Window Display</h3>
-    <div class="form-group">
-      <label>Number of Show Windows (Opening into Interior)</label>
-      <input type="number" [(ngModel)]="payload.show_windows" min="0" />
-    </div>
-    <div class="form-group">
-      <label>Number Protected Against Window Smashing</label>
-      <input type="number" [(ngModel)]="payload.show_windows" min="0" />
-    </div>
-    <div class="form-group">
-      <label>Protection Method</label>
-      <input type="text" [(ngModel)]="payload.show_windows" />
-    </div>
-    <div class="form-group">
-      <label>Number of Outside Showcases</label>
-      <input type="number" [(ngModel)]="payload.show_windows" min="0" />
-    </div>
-    <div class="form-group">
-      <label>Maximum Value Displayed - All Windows & Showcases ($)</label>
-      <input type="number" [(ngModel)]="payload.show_windows" min="0" />
-    </div>
-    <div class="form-group">
-      <label>Maximum Value - Any One Window ($)</label>
-      <input type="number" [(ngModel)]="payload.show_windows" min="0" />
-    </div>
-    <div class="form-group">
-      <label>Maximum Value - Any One Article ($)</label>
-      <input type="number" [(ngModel)]="payload.show_windows" min="0" />
-    </div>
   </div>
 
   <!-- Step 8: Review & Submit -->
-  <div class="card" *ngIf="currentStep === 8">
+  <div class="card" *ngIf="currentStep === 6">
     <h2>8. Review & Submit</h2>
     <p>Please review your application details before submitting.</p>
     
@@ -649,6 +520,9 @@
       [disabled]="currentStep === 1"
     >
       Previous
+    </button>
+    <button type="button" class="btn btn-info" (click)="saveProgress()" style="margin: 0 10px;">
+      Save
     </button>
     <button
       *ngIf="currentStep < totalSteps"

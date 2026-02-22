@@ -34,12 +34,16 @@ export interface ApplicationPayload {
 
   // Section 5: Cancellations/Refusals
   cancellations_refusals?: string;
+  loss_history_percentage?: number;
+  loss_history_load_credit?: number;
+
 
   // Section 6: Jewellers Security Alliance
   jewellers_security_alliance_member?: boolean;
 
   // Section 7: Claims Settlement Basis
   claims_settlement_basis?: string;
+  custom_discount?: number;
 
   // Section 8: Inventories
   last_inventory_date?: string;
