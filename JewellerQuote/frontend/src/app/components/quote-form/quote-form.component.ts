@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApplicationService } from '../../../services/application.service';
 import { QuoteService } from '../../../services/quote.service';
-import { ApplicationPayload, ApplicationCreate, TravelRecord, Traveller, SafeVault, InsuranceLayer, PremiumExposureRates, NonStandardCoverage, Deductibles, Adjustment } from '../../../models/application.model';
+import { ApplicationPayload, ApplicationCreate, TravelRecord, Traveller, SafeVault, InsuranceLayer, PremiumExposureRates, NonStandardCoverage, Deductibles, Adjustment, ExhibitionLayer } from '../../../models/application.model';
 
 @Component({
   selector: 'app-quote-form',
@@ -15,7 +15,7 @@ import { ApplicationPayload, ApplicationCreate, TravelRecord, Traveller, SafeVau
 })
 export class QuoteFormComponent implements OnInit {
   currentStep = 1;
-  totalSteps = 8;
+  totalSteps = 6;
   payload: ApplicationPayload = {};
   loading = false;
   totalPremisesExposurePremium = 0;
@@ -105,7 +105,7 @@ export class QuoteFormComponent implements OnInit {
     { id: '5', label: 'Other Method', limit: 0, excessOf: 0, exposure: 0 }
   ];
 
-  exhibitionLayers: any[] = [
+  exhibitionLayers: ExhibitionLayer[] = [
     { id: '1', label: 'Including Shipments', limit: 0, no_of_shows: 0, premium: 0 },
     { id: '2', label: 'Excluding Shipments', limit: 0, no_of_shows: 0, premium: 0 }
   ];
@@ -255,6 +255,8 @@ export class QuoteFormComponent implements OnInit {
       travel: [],
       unattended_vehicle_load_percent: 0,
       percentage_of_exposure: 0,
+      custom_discount: 0,
+      insurance_start_date: new Date().toISOString().split('T')[0],
       adjustments: [
         { description: 'First Loss Adjustment', loadCredit: 0, premium: 0 },
         { description: 'Premises / vault security', loadCredit: 0, premium: 0 },
@@ -263,6 +265,7 @@ export class QuoteFormComponent implements OnInit {
       ],
       loss_history_percentage: 0,
       loss_history_load_credit: 0,
+      loss_history_premium: 0,
       nonStandardCoverage: [],
       deductibles: this.deductibleOptions.map(type => ({ type, amount: 0, loadCredit: 0 })),
       travellers: [],
@@ -271,7 +274,9 @@ export class QuoteFormComponent implements OnInit {
       alarm_system: {},
       holdup_alarm: {},
       show_windows: {},
-      limit_layers: []
+      other_layers: this.otherLayers,
+      sendings_layers: this.sendingsLayers,
+      exhibition_layers: this.exhibitionLayers,
     };
   }
 
@@ -293,6 +298,7 @@ export class QuoteFormComponent implements OnInit {
   nextStep(): void {
     if (this.currentStep < this.totalSteps) {
       this.currentStep++;
+      window.scrollTo(0, 0);
     }
     if (this.currentStep === 2 && this.isStep1Valid()) {
       const exp = this.calculateExposure(this.payload.cadLimit || 0, this.layers);
@@ -314,6 +320,7 @@ export class QuoteFormComponent implements OnInit {
   previousStep(): void {
     if (this.currentStep > 1) {
       this.currentStep--;
+      window.scrollTo(0, 0);
     }
   }
 
@@ -402,12 +409,16 @@ export class QuoteFormComponent implements OnInit {
   }
 
   updateOtherLayerLimit(layer: InsuranceLayer, value: any): void {
-    const limit = this.parseCurrency(value);
-    layer.limit = limit;
+    const parsedValue = this.parseCurrency(value);
 
     const rate = this.otherExpRates.find(r => r.layerId === layer.id);
+    if (layer.id === 'memo_exposure') {
+      layer.exposure = parsedValue;
+    } else {
+      layer.limit = parsedValue;
+    }
     if (rate) {
-      layer.premium = limit * (rate.rate / 100);
+      layer.premium = parsedValue * (rate.rate / 100);
     }
   }
 
@@ -421,12 +432,12 @@ export class QuoteFormComponent implements OnInit {
     }
   }
 
-  updateExhibitionLimit(layer: any, value: any): void {
+  updateExhibitionLimit(layer: ExhibitionLayer, value: any): void {
     layer.limit = this.parseCurrency(value);
     this.calculateExhibitionPremium(layer);
   }
 
-  calculateExhibitionPremium(layer: any): void {
+  calculateExhibitionPremium(layer: ExhibitionLayer): void {
     const rateObj = this.exhibitionPremiumRates.find(r => r.layerId === layer.id);
     if (rateObj) {
       layer.premium = (layer.limit || 0) * (layer.no_of_shows || 0) * (rateObj.rate / 100);
@@ -596,6 +607,11 @@ export class QuoteFormComponent implements OnInit {
   }
 
   saveProgress(): void {
+    this.payload.other_layers = this.otherLayers;
+    this.payload.sendings_layers = this.sendingsLayers;
+    this.payload.exhibition_layers = this.exhibitionLayers;
+    this.calculateNonStandardPremiums();
+    this.payload.loss_history_premium = this.calculateLossHistoryPremium();
     localStorage.setItem('jeweller_quote_payload', JSON.stringify(this.payload));
     alert('Progress saved successfully!');
   }
@@ -606,6 +622,15 @@ export class QuoteFormComponent implements OnInit {
     if (savedPayload) {
       try {
         this.payload = JSON.parse(savedPayload);
+        if (this.payload.other_layers) {
+          this.otherLayers = this.payload.other_layers;
+        }
+        if (this.payload.sendings_layers) {
+          this.sendingsLayers = this.payload.sendings_layers;
+        }
+        if (this.payload.exhibition_layers) {
+          this.exhibitionLayers = this.payload.exhibition_layers;
+        }
       } catch (e) {
         console.error('Error parsing saved payload', e);
       }
@@ -632,10 +657,14 @@ export class QuoteFormComponent implements OnInit {
 
     // Calculate total stock value
     this.payload.total_stock_value = this.calculateTotalStockValue();
+    this.payload.other_layers = this.otherLayers;
+    this.payload.sendings_layers = this.sendingsLayers;
+    this.payload.exhibition_layers = this.exhibitionLayers;
+    this.calculateNonStandardPremiums();
+    this.payload.loss_history_premium = this.calculateLossHistoryPremium();
 
     const applicationData: ApplicationCreate = {
-      firm_name: this.payload.firm_name,
-      country: this.payload.country,
+      ...this.payload
     };
 
     this.applicationService.createApplication(applicationData).subscribe({
@@ -656,5 +685,14 @@ export class QuoteFormComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  calculateNonStandardPremiums(): void {
+    const basePremium = this.calculateFinalTravelPremium();
+    if (this.payload.nonStandardCoverage) {
+      this.payload.nonStandardCoverage.forEach(item => {
+        item.premium = ((item.loadCredit || 0) / 100) * basePremium;
+      });
+    }
   }
 }

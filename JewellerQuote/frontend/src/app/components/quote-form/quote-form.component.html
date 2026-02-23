@@ -142,7 +142,11 @@
       <tbody>
         <tr *ngFor="let layer of otherLayers; let i = index">
           <td>{{ layer.label }}</td>
-          <td><input type="text" [ngModel]="layer.limit | number:'1.0-0'" (ngModelChange)="updateOtherLayerLimit(layer, $event)" [ngModelOptions]="{updateOn: 'blur'}" /></td>
+          <td>
+            <div class="form-group" style="margin-bottom: 0;">
+              <input type="text" [ngModel]="layer.limit | number:'1.0-0'" (ngModelChange)="updateOtherLayerLimit(layer, $event)" [ngModelOptions]="{updateOn: 'blur'}" style="width: 100%;" />
+            </div>
+          </td>
           <td>{{(layer.premium | currency:'USD':'symbol':'1.0-0')}}</td>
         </tr>
       </tbody>
@@ -172,8 +176,7 @@
       <tbody>
         <tr>
           <td>Increase In Limit</td>
-          <td>
-            <div class="form-group" style="margin-bottom: 0;"><input type="text" [ngModel]="payload.increase_limit_amount | number:'1.0-0'" (ngModelChange)="payload.increase_limit_amount = parseCurrency($event)" [ngModelOptions]="{updateOn: 'blur'}" style="width: 100%;" /></div>
+          <td><div class="form-group" style="margin-bottom: 0;"><input type="text" [ngModel]="payload.increase_limit_amount | number:'1.0-0'" (ngModelChange)="payload.increase_limit_amount = parseCurrency($event)" [ngModelOptions]="{updateOn: 'blur'}" style="width: 100%;" /></div>
           </td>
           <td>
             <div class="form-group" style="margin-bottom: 0;"><input type="number" [(ngModel)]="payload.increase_limit_days" style="width: 100%;" /></div>
@@ -303,7 +306,7 @@
         </div>
         <div class="form-group">
           <label>Load/Credit (%)</label>
-          <input type="number" [(ngModel)]="item.loadCredit" />
+          <input type="number" [(ngModel)]="item.loadCredit" step="0.01" />
         </div>
         <div class="form-group">
           <label>Premium</label>
@@ -320,7 +323,7 @@
       </div>
       <div class="form-group">
         <label>Total Load/Credit (%)</label>
-        <input type="number" [value]="calculateTotalNonStandardLoadCredit()" disabled />
+        <input type="text" [value]="calculateTotalNonStandardLoadCredit() | number:'1.2-2'" disabled />
       </div>
       <div class="form-group">
         <label>Total Load/Credit Premium</label>
@@ -349,7 +352,7 @@
           </td>
           <td>
             <div class="form-group" style="margin-bottom: 0;">
-              <input type="number" [(ngModel)]="item.loadCredit" style="width: 100%;" />
+              <input type="number" [(ngModel)]="item.loadCredit" style="width: 100%;" step="0.01" />
             </div>
           </td>
           <td>
@@ -365,7 +368,7 @@
       </div>
       <div class="form-group">
         <label>Total Load/Credit (%)</label>
-        <input type="number" [value]="calculateTotalDeductibleLoadCredit()" disabled />
+        <input type="text" [value]="calculateTotalDeductibleLoadCredit() | number:'1.2-2'" disabled />
       </div>
       <div class="form-group">
         <label>Total Load/Credit Premium</label>
@@ -373,9 +376,9 @@
       </div>
     </div>
     <div class="form-row" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
-      <div class="form-group">
-        <label style="font-weight: bold;">Mechanical Premium</label>
-        <input type="text" [value]="calculateMechanicalPremium() | currency:'USD':'symbol':'1.2-2'" disabled style="font-weight: bold;" />
+      <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+        <label style="font-weight: bold; margin-bottom: 0; flex: 1;">Mechanical Premium</label>
+        <input type="text" [value]="calculateMechanicalPremium() | currency:'USD':'symbol':'1.2-2'" disabled style="font-weight: bold; flex: 1;" />
       </div>
     </div>
   </div>
@@ -384,9 +387,9 @@
   <div class="card" *ngIf="currentStep === 5">
     <h2>5. Risk Assessment</h2>
     <h3>Adjustments</h3>
-    <div class="form-group">
-      <label>Percentage of exposure (%)</label>
-      <input type="number" [(ngModel)]="payload.percentage_of_exposure" (ngModelChange)="updateFirstLossAdjustment()" />
+    <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+      <label style="margin-bottom: 0; flex: 1;">Percentage of exposure (%)</label>
+      <input type="number" [(ngModel)]="payload.percentage_of_exposure" (ngModelChange)="updateFirstLossAdjustment()" style="flex: 1;" />
     </div>
 
     <table class="table">
@@ -401,10 +404,14 @@
       <tbody>
         <tr *ngFor="let item of payload.adjustments; let i = index">
           <td>
-            <input type="text" [(ngModel)]="item.description" style="width: 100%;" />
+            <div class="form-group" style="margin-bottom: 0;">
+              <input type="text" [(ngModel)]="item.description" style="width: 100%;" />
+            </div>
           </td>
           <td>
-            <input type="number" [(ngModel)]="item.loadCredit" [disabled]="i === 0" style="width: 100%;" />
+            <div class="form-group" style="margin-bottom: 0;">
+              <input type="number" [(ngModel)]="item.loadCredit" [disabled]="i === 0" style="width: 100%;" step="0.01" />
+            </div>
           </td>
           <td>
             <input type="text" [value]="calculateAdjustmentPremium(item) | currency:'USD':'symbol':'1.2-2'" disabled style="width: 100%; border: none; background: transparent;" />
@@ -416,7 +423,7 @@
         <tr>
           <td style="font-weight: bold;">Total Load / Credit & Premium:</td>
           <td>
-            <input type="number" [value]="calculateTotalAdjustmentLoadCredit()" disabled style="width: 100%; font-weight: bold;" />
+            <input type="text" [value]="calculateTotalAdjustmentLoadCredit() | number:'1.2-2'" disabled style="width: 100%; font-weight: bold; border: none; background: transparent;" />
           </td>
           <td>
             <input type="text" [value]="calculateTotalAdjustmentPremium() | currency:'USD':'symbol':'1.2-2'" disabled style="width: 100%; border: none; background: transparent; font-weight: bold;" />
@@ -425,7 +432,7 @@
         </tr>
       </tfoot>
     </table>
-    <button type="button" class="btn btn-secondary" (click)="addAdjustment()">Add Adjustment</button>
+    <button type="button" class="btn btn-secondary" (click)="addAdjustment()" style="margin-top: 10px;">Add Adjustment</button>
 
     <h3>Loss History</h3>
     <table class="table">
@@ -440,24 +447,32 @@
       <tbody>
         <tr>
           <td>Loss Ratio</td>
-          <td><input type="number" [(ngModel)]="payload.loss_history_percentage" style="width: 100%;" /></td>
-          <td><input type="number" [(ngModel)]="payload.loss_history_load_credit" style="width: 100%;" /></td>
+          <td>
+            <div class="form-group" style="margin-bottom: 0;">
+              <input type="number" [(ngModel)]="payload.loss_history_percentage" style="width: 100%;" />
+            </div>
+          </td>
+          <td>
+            <div class="form-group" style="margin-bottom: 0;">
+              <input type="number" [(ngModel)]="payload.loss_history_load_credit" style="width: 100%;" step="0.01" />
+            </div>
+          </td>
           <td><input type="text" [value]="calculateLossHistoryPremium() | currency:'USD':'symbol':'1.2-2'" disabled style="width: 100%; border: none; background: transparent;" /></td>
         </tr>
       </tbody>
     </table>
    
     <div class="form-row" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
-      <div class="form-group">
-        <label style="font-weight: bold;">Technical Premium</label>
-        <input type="text" [value]="calculateTechnicalPremium() | currency:'USD':'symbol':'1.2-2'" disabled style="font-weight: bold;" />
+      <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+        <label style="font-weight: bold; margin-bottom: 0; flex: 1;">Technical Premium</label>
+        <input type="text" [value]="calculateTechnicalPremium() | currency:'USD':'symbol':'1.2-2'" disabled style="font-weight: bold; flex: 1;" />
       </div>
     </div>
 
      <h3>Premium</h3>
-     <div class="form-group">
-       <label>Custom Discount (%)</label>
-       <input type="number" [(ngModel)]="payload.custom_discount" />
+     <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+       <label style="margin-bottom: 0; flex: 1;">Custom Discount (%)</label>
+       <input type="number" [(ngModel)]="payload.custom_discount" style="flex: 1;" />
      </div>
      <table class="table">
       <thead>

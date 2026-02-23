@@ -9,95 +9,45 @@ export interface ApplicationPayload {
   totalDiscounts?: number;
   business_type?: string;
   dropdown_clause?: string;
-  
+
 
   // Section 2: Nature of Business
-  limit_layers?: InsuranceLayer[];
   other_layers?: InsuranceLayer[];
-  manufacturing_percent?: number;
-  wholesale_percent?: number;
-  retail_percent?: number;
+  sendings_layers?: InsuranceLayer[];
+  exhibition_layers?: ExhibitionLayer[];
   // Section 3: Employees
   travel?: TravelRecord[];
   increase_limit_amount?: number;
   increase_limit_days?: number;
   peak_season_rate?: number;
-   unattended_vehicle_load_percent?: number;
-   percentage_of_exposure?: number;
-   adjustments?: Adjustment[];
+  unattended_vehicle_load_percent?: number;
+  percentage_of_exposure?: number;
+  adjustments?: Adjustment[];
 
   // Section 4: Travel (array of travel records)
- 
- 
+
+
   nonStandardCoverage?: NonStandardCoverage[];
   deductibles?: Deductibles[];
 
   // Section 5: Cancellations/Refusals
-  cancellations_refusals?: string;
   loss_history_percentage?: number;
   loss_history_load_credit?: number;
+  loss_history_premium?: number;
+  custom_discount?: number;
+  insurance_start_date?: string;
+
 
 
   // Section 6: Jewellers Security Alliance
-  jewellers_security_alliance_member?: boolean;
 
   // Section 7: Claims Settlement Basis
-  claims_settlement_basis?: string;
-  custom_discount?: number;
 
   // Section 8: Inventories
-  last_inventory_date?: string;
   last_inventory_amount?: number;
-  previous_inventory_date?: string;
-  previous_inventory_amount?: number;
-  max_stock_12_months?: number;
-  min_stock_12_months?: number;
-  average_others_property?: number;
   stock_composition?: StockComposition;
-  peak_season_additional_stock?: number;
-  russian_diamonds_since_2024?: boolean;
-
-  // Section 9: Bookkeeping
-  inventory_frequency?: string;
-
-  // Section 10: Optional Coverages
-  fire_lightning_required?: boolean;
-  fire_rate?: number;
-  flood_required?: boolean;
-  earthquake_required?: boolean;
-
-  // Section 11: Property at Premises
-  stock_limit?: number;
-  money_in_safe_limit?: number;
-  patterns_moulds_dies_limit?: number;
-  furniture_fixtures_limit?: number;
-  improvements_betterments_limit?: number;
-
-  // Section 12: Bank/Safe Deposit Vault
-  bank_vault_limit?: number;
-  bank_vault_name_address?: string;
-
-  // Section 13: Memorandum
-  memorandum_limit?: number;
-  average_daily_others_custody?: number;
-
-  // Section 14: Registered Mail
-  registered_mail_limit?: number;
-  registered_mail_12_months_total?: number;
-
-  // Section 15: Deductibles
-  stock_deductible?: number;
-  other_property_deductible?: number;
 
   // Section 16: Building Details
-  building_stories?: number;
-  building_walls?: string;
-  building_roof?: string;
-  building_floor?: string;
-  sprinkler?: boolean;
-  hydrant_protected?: boolean;
-  distance_from_fire_hall?: string;
-  neighbouring_properties?: NeighbouringProperties;
 
   // Section 17: Business Interruption
   annual_gross_revenue?: number;
@@ -110,19 +60,10 @@ export interface ApplicationPayload {
   // Section 19: Show Window Display
   show_windows?: ShowWindowDetails;
 
-  // Section 20: Special Coverages
-  special_coverages?: string;
-
   // Section 21: Premises Protection
   alarm_system?: AlarmSystem;
   holdup_alarm?: HoldupAlarm;
   safes_vaults?: SafeVault[];
-
-  // Section 22: Warranty
-  property_in_safe_vault_percent?: number;
-
-  // Section 23: Insurance Start Date
-  insurance_start_date?: string;
 
   // Calculated/derived fields
   total_stock_value?: number;
@@ -137,6 +78,7 @@ export interface TravelRecord {
 export interface NonStandardCoverage {
   type?: string;
   loadCredit?: number;
+  premium?: number;
 }
 
 export interface Deductibles {
@@ -167,13 +109,6 @@ export interface StockComposition {
   jewellers_findings_percent?: number;
   other_stock_percent?: number;
   other_stock_description?: string;
-}
-
-export interface NeighbouringProperties {
-  right?: string;
-  left?: string;
-  beneath?: string;
-  above?: string;
 }
 
 export interface Traveller {
@@ -258,17 +193,7 @@ export interface Application {
   created_at: string;
 }
 
-export interface ApplicationCreate {
-  firm_name?: string;
-  country?: string;
-  currency?: string;
-  exRate?: number;
-  cadLimit?: number;
-  cadExcess?: number;
-  totalDiscounts?: number;
-  business_type?: string;
-  dropdown_clause?: string;
-}
+export interface ApplicationCreate extends ApplicationPayload {}
 
 export interface InsuranceLayer {
   id: string;
@@ -276,6 +201,14 @@ export interface InsuranceLayer {
   limit: number;      // How much this layer pays
   excessOf: number;
   exposure: number;
+  premium?: number;
+}
+
+export interface ExhibitionLayer {
+  id: string;
+  label: string;
+  limit: number;
+  no_of_shows: number;
   premium?: number;
 }
 
