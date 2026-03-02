@@ -34,8 +34,12 @@ export interface ApplicationPayload {
   loss_history_percentage?: number;
   loss_history_load_credit?: number;
   loss_history_premium?: number;
+  excluding_quake_flood?: string;
+  excluding_quake_flood_load?: number;
+  excluding_quake_flood_premium?: number;
   custom_discount?: number;
   insurance_start_date?: string;
+  insurance_expiry_date?: string;
 
 
 
@@ -67,6 +71,14 @@ export interface ApplicationPayload {
 
   // Calculated/derived fields
   total_stock_value?: number;
+
+  // Rates and Scales
+  rates?: PremiumExposureRates[];
+  otherExpRates?: PremiumExposureRates[];
+  sendingPremiumRates?: PremiumExposureRates[];
+  exhibitionPremiumRates?: PremiumExposureRates[];
+  firstLossScale?: FirstLossScale[];
+  peakSeasonRate?: number;
 }
 
 export interface TravelRecord {
@@ -210,6 +222,11 @@ export interface ExhibitionLayer {
   limit: number;
   no_of_shows: number;
   premium?: number;
+}
+
+export interface FirstLossScale {
+  exposure: number;
+  load: number;
 }
 
 export interface PremiumExposureRates {

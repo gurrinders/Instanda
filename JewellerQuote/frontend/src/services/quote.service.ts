@@ -41,4 +41,12 @@ export class QuoteService {
       { headers: this.getHeaders() }
     );
   }
+
+  saveRates(quoteId: number, ratesData: any): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/submissions/rates`,
+      { quote_id: quoteId, ...ratesData },
+      { headers: this.getHeaders() }
+    );
+  }
 }

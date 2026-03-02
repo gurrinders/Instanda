@@ -40,17 +40,17 @@ export class QuoteFormComponent implements OnInit {
   ];
 
   otherLayers: InsuranceLayer[] = [
-    { id: 'sdv', label: 'SDV - if different from premises', limit: 0, excessOf: 0, exposure: 0 },
-    { id: 'money', label: 'Money', limit: 0, excessOf: 0, exposure: 0 },
-    { id: 'memo_limit', label: 'Memo - Limit', limit: 0, excessOf: 0, exposure: 0 },
-    { id: 'memo_exposure', label: 'Memo - Exposure', limit: 0, excessOf: 0, exposure: 0 },
-    { id: 'patterns', label: 'Patterns, Molds and FF&F', limit: 0, excessOf: 0, exposure: 0 },
-    { id: 'windows_day', label: 'Show Windows - Day', limit: 0, excessOf: 0, exposure: 0 },
-    { id: 'windows_night', label: 'Show Windows - Night', limit: 0, excessOf: 0, exposure: 0 },
-    { id: 'out_of_safe', label: 'Out of safe', limit: 0, excessOf: 0, exposure: 0 },
-    { id: 'wearing_risk', label: 'Wearing Risk', limit: 0, excessOf: 0, exposure: 0 },
-    { id: 'improvements', label: 'Improvements/Betterments', limit: 0, excessOf: 0, exposure: 0 },
-    { id: 'travel', label: 'Incidental Travel', limit: 0, excessOf: 0, exposure: 0 }
+    { id: 'sdv', label: 'SDV - if different from premises', limit: 25000, excessOf: 0, exposure: 0 },
+    { id: 'money', label: 'Money', limit: 25000, excessOf: 0, exposure: 0 },
+    { id: 'memo_limit', label: 'Memo - Limit', limit: 25000, excessOf: 0, exposure: 0 },
+    { id: 'memo_exposure', label: 'Memo - Exposure', limit: 25000, excessOf: 0, exposure: 0 },
+    { id: 'patterns', label: 'Patterns, Molds and FF&F', limit: 25000, excessOf: 0, exposure: 0 },
+    { id: 'windows_day', label: 'Show Windows - Day', limit: 25000, excessOf: 0, exposure: 0 },
+    { id: 'windows_night', label: 'Show Windows - Night', limit: 25000, excessOf: 0, exposure: 0 },
+    { id: 'out_of_safe', label: 'Out of safe', limit: 25000, excessOf: 0, exposure: 0 },
+    { id: 'wearing_risk', label: 'Wearing Risk', limit: 25000, excessOf: 0, exposure: 0 },
+    { id: 'improvements', label: 'Improvements/Betterments', limit: 25000, excessOf: 0, exposure: 0 },
+    { id: 'travel', label: 'Incidental Travel', limit: 25000, excessOf: 0, exposure: 0 }
   ];
 
   rates: PremiumExposureRates[] = [
@@ -238,9 +238,15 @@ export class QuoteFormComponent implements OnInit {
   ngOnInit(): void {
     this.initializePayload();
     this.loadProgress();
+    this.otherLayers.forEach(layer => {
+      this.updateOtherLayerLimit(layer, layer.limit);
+    });
   }
 
   initializePayload(): void {
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    const startDate = date.toISOString().split('T')[0];
     this.payload = {
       firm_name: '',
       country: 'Canada',
@@ -256,7 +262,8 @@ export class QuoteFormComponent implements OnInit {
       unattended_vehicle_load_percent: 0,
       percentage_of_exposure: 0,
       custom_discount: 0,
-      insurance_start_date: new Date().toISOString().split('T')[0],
+      insurance_start_date: startDate,
+      insurance_expiry_date: this.calculateExpiryDate(startDate),
       adjustments: [
         { description: 'First Loss Adjustment', loadCredit: 0, premium: 0 },
         { description: 'Premises / vault security', loadCredit: 0, premium: 0 },
@@ -266,6 +273,9 @@ export class QuoteFormComponent implements OnInit {
       loss_history_percentage: 0,
       loss_history_load_credit: 0,
       loss_history_premium: 0,
+      excluding_quake_flood: 'No',
+      excluding_quake_flood_load: 0,
+      excluding_quake_flood_premium: 0,
       nonStandardCoverage: [],
       deductibles: this.deductibleOptions.map(type => ({ type, amount: 0, loadCredit: 0 })),
       travellers: [],
@@ -278,6 +288,18 @@ export class QuoteFormComponent implements OnInit {
       sendings_layers: this.sendingsLayers,
       exhibition_layers: this.exhibitionLayers,
     };
+  }
+
+  calculateExpiryDate(startDate: string): string {
+    if (!startDate) return '';
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + 365);
+    return date.toISOString().split('T')[0];
+  }
+
+  onStartDateChange(date: string): void {
+    this.payload.insurance_start_date = date;
+    this.payload.insurance_expiry_date = this.calculateExpiryDate(date);
   }
 
   calculateExposure(claimAmount: number, layers: InsuranceLayer[]) {
@@ -471,10 +493,14 @@ export class QuoteFormComponent implements OnInit {
   }
 
   calculateTotalNonStandardLoadCredit(): number {
-    if (!this.payload.nonStandardCoverage) {
-      return 0;
+    let total = 0;
+    if (this.payload.nonStandardCoverage) {
+      total = this.payload.nonStandardCoverage.reduce((sum, item) => sum + (Number(item.loadCredit) || 0), 0);
     }
-    return this.payload.nonStandardCoverage.reduce((sum, item) => sum + (Number(item.loadCredit) || 0), 0);
+    if (this.payload.excluding_quake_flood === 'Yes') {
+      total += (Number(this.payload.excluding_quake_flood_load) || 0);
+    }
+    return total;
   }
 
   calculateTotalNonStandardPremium(): number {
@@ -546,7 +572,7 @@ export class QuoteFormComponent implements OnInit {
     });
 
     if (match) {
-      this.payload.adjustments[0].loadCredit = -(100 - match.load);
+      this.payload.adjustments[0].loadCredit = parseFloat((-(100 - match.load)).toFixed(2));
     }
   }
 
@@ -664,7 +690,13 @@ export class QuoteFormComponent implements OnInit {
     this.payload.loss_history_premium = this.calculateLossHistoryPremium();
 
     const applicationData: ApplicationCreate = {
-      ...this.payload
+      ...this.payload,
+      rates: this.rates,
+      otherExpRates: this.otherExpRates,
+      sendingPremiumRates: this.sendingPremiumRates,
+      exhibitionPremiumRates: this.exhibitionPremiumRates,
+      firstLossScale: this.firstLossScale,
+      peakSeasonRate: this.peakSeasonRate
     };
 
     this.applicationService.createApplication(applicationData).subscribe({
@@ -672,7 +704,26 @@ export class QuoteFormComponent implements OnInit {
         // Create quote immediately after application
         this.quoteService.createQuote(application.id).subscribe({
           next: (quote) => {
-            this.router.navigate(['/quote', quote.id]);
+            const ratesPayload = {
+              rates: this.rates,
+              otherExpRates: this.otherExpRates,
+              peakSeasonRate: this.peakSeasonRate,
+              sendingPremiumRates: this.sendingPremiumRates,
+              exhibitionPremiumRates: this.exhibitionPremiumRates,
+              firstLossScale: this.firstLossScale,
+              totalDiscounts: this.payload.totalDiscounts,
+              peak_season_rate: this.payload.peak_season_rate
+            };
+
+            this.quoteService.saveRates(quote.id, ratesPayload).subscribe({
+              next: () => {
+                this.router.navigate(['/quote', quote.id]);
+              },
+              error: (error) => {
+                this.errorMessage = 'Failed to save rates: ' + (error.error?.detail || 'Unknown error');
+                this.loading = false;
+              }
+            });
           },
           error: (error) => {
             this.errorMessage = 'Failed to generate quote: ' + (error.error?.detail || 'Unknown error');
@@ -693,6 +744,11 @@ export class QuoteFormComponent implements OnInit {
       this.payload.nonStandardCoverage.forEach(item => {
         item.premium = ((item.loadCredit || 0) / 100) * basePremium;
       });
+    }
+    if (this.payload.excluding_quake_flood === 'Yes') {
+      this.payload.excluding_quake_flood_premium = ((this.payload.excluding_quake_flood_load || 0) / 100) * basePremium;
+    } else {
+      this.payload.excluding_quake_flood_premium = 0;
     }
   }
 }

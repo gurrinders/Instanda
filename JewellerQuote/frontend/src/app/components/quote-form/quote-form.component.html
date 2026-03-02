@@ -51,29 +51,29 @@
       <label>Currency</label>
       <input type="text" [(ngModel)]=" payload.currency" disabled="true" />
     </div>
-    <div class="form-group">
+    <!-- <div class="form-group">
       <label>Exchange Rate</label>
       <input type="number" [(ngModel)]="payload.exRate" #exRate="ngModel" required />
       <div *ngIf="exRate.touched && !payload.exRate" class="text-danger">
         Exchange Rate cannot be zero or blank
       </div>
-    </div>
+    </div> -->
      <div class="form-group">
       <label>CAD Limit</label>
       <input type="text" [ngModel]="payload.cadLimit | number:'1.0-0'" (ngModelChange)="payload.cadLimit = parseCurrency($event)" [ngModelOptions]="{updateOn: 'blur'}" />
     </div>
-     <div class="form-group">
+     <!-- <div class="form-group">
       <label>CAD Excess</label>
       <input type="text" [ngModel]="payload.cadExcess | number:'1.0-0'" (ngModelChange)="payload.cadExcess = parseCurrency($event)" [ngModelOptions]="{updateOn: 'blur'}" />
-    </div>
+    </div> -->
     <div class="form-group">
       <label>USD Limit</label>
       <input type="text" [value]="((payload.cadLimit || 0) * (payload.exRate || 0)) | number:'1.0-0'" disabled />
     </div>
-    <div class="form-group">
+    <!-- <div class="form-group">
       <label>USD Excess</label>
       <input type="text" [value]="((payload.cadExcess || 0) * (payload.exRate || 0)) | number:'1.0-0'" disabled />
-    </div>
+    </div> -->
     <div class="form-group">
       <label>Business Type</label>
       <select [(ngModel)]="payload.business_type">
@@ -106,7 +106,7 @@
     <h2>2. Exposure Information</h2>
     <h3> Premises Exposure</h3>
     <table class="table">
-      <thead>
+      <!-- <thead>
         <tr>
           <th>Label</th>
           <th>Limit</th>
@@ -121,10 +121,10 @@
           <td>{{(layer.exposure | currency:'USD':'symbol':'1.0-0')}}</td>
           <td>{{(layer.premium | currency:'USD':'symbol':'1.0-0')}}</td>
         </tr>
-      </tbody>
+      </tbody> -->
       <tfoot>
         <tr>
-          <td colspan="3" style="text-align: right; font-weight: bold;">Total Premium</td>
+          <td colspan="3" style="text-align: left; font-weight: bold;">Total Premium</td>
           <td style="font-weight: bold;">{{ calculateTotalExposurePremium() | currency:'USD':'symbol':'1.0-0' }}</td>
         </tr>
       </tfoot>
@@ -288,9 +288,11 @@
       <span style="font-weight: bold; font-size: 1.2em;">{{ calculateTotalExhibitionPremium() | currency:'USD':'symbol':'1.2-2' }}</span>
     </div>
 
-    <div class="form-group" style="text-align: right; margin-top: 20px;">
-      <label style="font-weight: bold; margin-right: 10px;">Exposure Premium:</label>
-      <span style="font-weight: bold; font-size: 1.2em;">{{ calculateFinalTravelPremium() | currency:'USD':'symbol':'1.2-2' }}</span>
+    <div class="form-row" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
+      <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+        <label style="font-weight: bold; margin-bottom: 0; flex: 1;">Exposure Premium</label>
+        <input type="text" [value]="calculateFinalTravelPremium() | currency:'USD':'symbol':'1.2-2'" disabled style="font-weight: bold; flex: 1;" />
+      </div>
     </div>
   </div>
 
@@ -315,7 +317,26 @@
       </div>
       <button type="button" class="btn btn-secondary" (click)="removeNonStandardCoverage(i)">Remove</button>
     </div>
-    <button type="button" class="btn btn-secondary" (click)="addNonStandardCoverage()">Add Non-Standard Coverage</button>
+    <!-- <button type="button" class="btn btn-secondary" (click)="addNonStandardCoverage()">Add Non-Standard Coverage</button> -->
+    
+    <div class="form-row" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+      <div class="form-group">
+        <label>Excluding quake/flood</label>
+        <select [(ngModel)]="payload.excluding_quake_flood" (change)="calculateNonStandardPremiums()">
+          <option value="No">No</option>
+          <option value="Yes">Yes</option>
+        </select>
+      </div>
+      <div class="form-group" *ngIf="payload.excluding_quake_flood === 'Yes'">
+        <label>Load/Credit (%)</label>
+        <input type="number" [(ngModel)]="payload.excluding_quake_flood_load" (ngModelChange)="calculateNonStandardPremiums()" />
+      </div>
+      <div class="form-group" *ngIf="payload.excluding_quake_flood === 'Yes'">
+        <label>Premium</label>
+        <input type="text" [value]="payload.excluding_quake_flood_premium | currency:'USD':'symbol':'1.2-2'" disabled />
+      </div>
+    </div>
+
     <div class="form-row" style="margin-top: 10px;">
       <div class="form-group">
         <label></label>
@@ -432,8 +453,9 @@
         </tr>
       </tfoot>
     </table>
-    <button type="button" class="btn btn-secondary" (click)="addAdjustment()" style="margin-top: 10px;">Add Adjustment</button>
+    <button type="button" class="btn btn-secondary" (click)="addAdjustment()" style="margin-top: 20px; margin-bottom: 20px;">Add Adjustment</button>
 
+    <hr style="border: 0; border-top: 2px solid #f0f0f0;" />
     <h3>Loss History</h3>
     <table class="table">
       <thead>
@@ -469,6 +491,7 @@
       </div>
     </div>
 
+     <hr style="border: 0; border-top: 2px solid #f0f0f0; margin: 30px 0;" />
      <h3>Premium</h3>
      <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
        <label style="margin-bottom: 0; flex: 1;">Custom Discount (%)</label>
@@ -512,13 +535,15 @@
     <div style="margin: 20px 0;">
       <h3>Summary</h3>
       <p><strong>Firm Name:</strong> {{ payload.firm_name || 'Not provided' }}</p>
-      <p><strong>Total Stock Value:</strong> {{ calculateTotalStockValue() }}</p>
-      <p><strong>Annual Gross Revenue:</strong> {{ payload.annual_gross_revenue}}</p>
     </div>
 
     <div class="form-group">
-      <label>Insurance Start Date</label>
-      <input type="date" [(ngModel)]="payload.insurance_start_date" />
+      <label>Insurance Effective Date</label>
+      <input type="date" [ngModel]="payload.insurance_start_date" (ngModelChange)="onStartDateChange($event)" />
+    </div>
+    <div class="form-group">
+      <label>Insurance Expiry Date</label>
+      <input type="date" [(ngModel)]="payload.insurance_expiry_date" disabled />
     </div>
 
     <div class="alert alert-danger" *ngIf="errorMessage">
