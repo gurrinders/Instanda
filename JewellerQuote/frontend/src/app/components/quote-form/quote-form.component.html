@@ -197,7 +197,7 @@
           <label>Travel Type</label>
           <select [(ngModel)]="item.travel_type">
             <option [ngValue]="undefined">Select</option>
-            <option *ngFor="let rate of travelPremiumRates" [value]="rate.layerId">{{ rate.label }}</option>
+            <option *ngFor="let rate of travelPremiumRates" [value]="rate.label">{{ rate.label }}</option>
           </select>
         </div>
         <div class="form-group">

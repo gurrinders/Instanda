@@ -9,6 +9,7 @@ export interface ApplicationPayload {
   totalDiscounts?: number;
   business_type?: string;
   dropdown_clause?: string;
+  totalPremisesExposurePremium?: number;
 
 
   // Section 2: Nature of Business
@@ -71,6 +72,12 @@ export interface ApplicationPayload {
 
   // Calculated/derived fields
   total_stock_value?: number;
+  sold_premium_with_total_discounts_cad?: number;
+  sold_premium_with_total_discounts_mechanical?: number;
+  sold_premium_with_total_discounts_ratio?: number;
+  premium_with_custom_discounts_cad?: number;
+  premium_with_custom_discounts_technical?: number;
+  premium_with_custom_discounts_ratio?: number;
 
   // Rates and Scales
   rates?: PremiumExposureRates[];

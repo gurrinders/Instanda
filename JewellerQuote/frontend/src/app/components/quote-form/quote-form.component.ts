@@ -254,6 +254,7 @@ export class QuoteFormComponent implements OnInit {
       exRate: 1.25,
       cadLimit: 0,
       cadExcess: 0,
+      totalPremisesExposurePremium: 0,
       business_type: 'Retailer',
       dropdown_clause: 'Yes',
       totalDiscounts: 30,
@@ -277,6 +278,12 @@ export class QuoteFormComponent implements OnInit {
       excluding_quake_flood_load: 0,
       excluding_quake_flood_premium: 0,
       nonStandardCoverage: [],
+      sold_premium_with_total_discounts_cad: 0,
+      sold_premium_with_total_discounts_mechanical: 0,
+      sold_premium_with_total_discounts_ratio: 0,
+      premium_with_custom_discounts_cad: 0,
+      premium_with_custom_discounts_technical: 0,
+      premium_with_custom_discounts_ratio: 0,
       deductibles: this.deductibleOptions.map(type => ({ type, amount: 0, loadCredit: 0 })),
       travellers: [],
       safes_vaults: [],
@@ -476,8 +483,8 @@ export class QuoteFormComponent implements OnInit {
     return 0;
   }
 
-  getTravelRate(layerId: string | undefined): number {
-    const rateObj = this.travelPremiumRates.find(r => r.layerId === layerId);
+  getTravelRate(label: string | undefined): number {
+    const rateObj = this.travelPremiumRates.find(r => r.label === label);
     return rateObj ? rateObj.rate : 0;
   }
 
@@ -638,6 +645,7 @@ export class QuoteFormComponent implements OnInit {
     this.payload.exhibition_layers = this.exhibitionLayers;
     this.calculateNonStandardPremiums();
     this.payload.loss_history_premium = this.calculateLossHistoryPremium();
+    this.calculateFinalPremiumsAndRatios();
     localStorage.setItem('jeweller_quote_payload', JSON.stringify(this.payload));
     alert('Progress saved successfully!');
   }
@@ -686,8 +694,10 @@ export class QuoteFormComponent implements OnInit {
     this.payload.other_layers = this.otherLayers;
     this.payload.sendings_layers = this.sendingsLayers;
     this.payload.exhibition_layers = this.exhibitionLayers;
+    this.payload.totalPremisesExposurePremium = this.totalPremisesExposurePremium;
     this.calculateNonStandardPremiums();
     this.payload.loss_history_premium = this.calculateLossHistoryPremium();
+    this.calculateFinalPremiumsAndRatios();
 
     const applicationData: ApplicationCreate = {
       ...this.payload,
@@ -750,5 +760,23 @@ export class QuoteFormComponent implements OnInit {
     } else {
       this.payload.excluding_quake_flood_premium = 0;
     }
+  }
+
+  calculateFinalPremiumsAndRatios(): void {
+    const finalTravelPremium = this.calculateFinalTravelPremium();
+    const mechanicalPremium = this.calculateMechanicalPremium();
+    const technicalPremium = this.calculateTechnicalPremium();
+    const totalDiscounts = this.payload.totalDiscounts || 0;
+    const customDiscount = this.payload.custom_discount || 0;
+
+    const customPremiumCad = finalTravelPremium * (1 - totalDiscounts / 100) / (1 - customDiscount / 100);
+
+    this.payload.sold_premium_with_total_discounts_cad = finalTravelPremium;
+    this.payload.sold_premium_with_total_discounts_mechanical = mechanicalPremium;
+    this.payload.sold_premium_with_total_discounts_ratio = customPremiumCad / (mechanicalPremium || 1);
+
+    this.payload.premium_with_custom_discounts_cad = customPremiumCad;
+    this.payload.premium_with_custom_discounts_technical = technicalPremium;
+    this.payload.premium_with_custom_discounts_ratio = customPremiumCad / (technicalPremium || 1);
   }
 }
