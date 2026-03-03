@@ -22,7 +22,7 @@ export class ApplicationService {
 
   createApplication(application: ApplicationCreate): Observable<Application> {
     return this.http.post<Application>(
-      `${this.apiUrl}/applications`,
+      `${this.apiUrl}/submissions/quote`,
       application,
       { headers: this.getHeaders() }
     );
@@ -30,14 +30,14 @@ export class ApplicationService {
 
   getApplications(): Observable<Application[]> {
     return this.http.get<Application[]>(
-      `${this.apiUrl}/applications`,
+      `${this.apiUrl}/submissions/quote`,
       { headers: this.getHeaders() }
     );
   }
 
   getApplication(id: number): Observable<Application> {
     return this.http.get<Application>(
-      `${this.apiUrl}/applications/${id}`,
+      `${this.apiUrl}/submissions/quote/${id}`,
       { headers: this.getHeaders() }
     );
   }
