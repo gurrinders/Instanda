@@ -8,7 +8,7 @@ import { User, UserCreate, LoginRequest, TokenResponse } from '../models/user.mo
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8000';
+  private apiUrl = 'https://ca-jeweller-quote.calmtree-8a9c8c27.eastus.azurecontainerapps.io';
   private tokenKey = 'jwt_token';
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();

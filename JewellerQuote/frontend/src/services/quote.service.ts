@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class QuoteService {
-  private apiUrl = 'http://localhost:8000';
+  private apiUrl = 'https://ca-jeweller-quote.calmtree-8a9c8c27.eastus.azurecontainerapps.io';
 
   constructor(
     private http: HttpClient,
